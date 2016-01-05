@@ -10,3 +10,5 @@ rel/example_project
 .rebar
 .erlang.mk.packages.v2
 elvis
+hexer.config
+conferl.d

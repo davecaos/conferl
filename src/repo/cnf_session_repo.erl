@@ -60,7 +60,6 @@ is_valid(UserName, Token) ->
     {ok, MaxSessionDays} = application:get_env(conferl, max_session_days),
     UpdatedTime = cnf_session:updated_at(Session),
     Now = calendar:universal_time(),
-    Diff = calendar:time_difference(UpdatedTime, Now),
     {DiffDays, _} = calendar:time_difference(UpdatedTime, Now),
     DiffDays < MaxSessionDays
   catch

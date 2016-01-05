@@ -11,6 +11,12 @@
      cowboy
     ]},
   {modules, []},
-  {mod, {conferl, []}}
+  {mod, {conferl, []}},
+  {registered, []},
+  {pkg_name, conferl},
+  {maintainers, ["Inaka"]},
+  {licenses, ["Apache 2.0"]},
+  {links, [{"Github", "https://github.com/inaka/conferl"}]}
  ]
 }.
+
