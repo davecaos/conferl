@@ -1,18 +1,20 @@
 PROJECT = conferl
 
-DEPS = lager cowboy sync sumo_db mixer jiffy xref_runner uuid
+DEPS = lager cowboy  sumo_db inaka_mixer barrel_jiffy xref_runner uuid
 
 TEST_DEPS = shotgun
 
-dep_lager       = git https://github.com/basho/lager.git     2.1.0
-dep_sync        = git https://github.com/inaka/sync.git      0.1.3
-dep_sumo_db     = git https://github.com/inaka/sumo_db.git   0.3.7
-dep_cowboy      = git git://github.com/ninenines/cowboy.git  1.0.1
-dep_mixer       = git git://github.com/inaka/mixer.git       0.1.3
-dep_jiffy       = git git://github.com/davisp/jiffy.git      0.11.3
-dep_shotgun     = git git://github.com/inaka/shotgun.git     0.1.10
-dep_xref_runner = git git://github.com/inaka/xref_runner.git 0.2.2
-dep_uuid        = git git://github.com/okeuday/uuid.git      v1.5.0
+SHELL_DEPS = sync
+
+dep_lager        = hex 3.0.2
+dep_sync         = git https://github.com/rustyio/sync.git    9c78e7b
+dep_sumo_db      = git https://github.com/inaka/sumo_db.git   0.3.13
+dep_cowboy       = hex 1.0.4
+dep_inaka_mixer  = hex 0.1.5
+dep_barrel_jiffy = hex 0.14.4
+dep_shotgun     = git git://github.com/inaka/shotgun.git     0.1.12
+dep_xref_runner = hex 0.2.4
+dep_uuid        = git git://github.com/okeuday/uuid.git      v1.5.1
 
 PLT_APPS := inets
 DIALYZER_DIRS := ebin/
