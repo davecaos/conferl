@@ -79,9 +79,7 @@ sumo_schema() ->
 %%
 %% @doc functions definitions for user
 
--spec new( string()
-         , string()
-         , string()) -> user().
+-spec new( string(), string(), string()) -> user().
 new(UserName, Password, Email) ->
   Now = calendar:universal_time(),
   #{ id         => undefined
@@ -97,7 +95,7 @@ id(User) -> maps:get(id, User).
 
 -spec user_name(user()) -> string().
 user_name(User) ->
-  maps:get(user_name,User).
+  maps:get(user_name, User).
 
 -spec user_name(user(), string()) -> user().
 user_name(User, UserName) ->

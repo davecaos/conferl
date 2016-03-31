@@ -2,7 +2,7 @@
  [
   {description,
    "Auto-Conference Service in Erlang (similar to Disqus)"},
-  {vsn, "0.0.1"},
+  {vsn, git},
   {applications,
     [kernel,
      stdlib,

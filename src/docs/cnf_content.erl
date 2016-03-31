@@ -89,8 +89,7 @@ sumo_schema() ->
 %%
 %% @doc functions definitions for content
 
--spec new( string()
-         , integer()) -> content() | invalid_url.
+-spec new(string(), integer()) -> content() | invalid_url.
 new(Url, User) ->
   Now = calendar:universal_time(),
   #{ id         => undefined
@@ -112,7 +111,7 @@ url(Content) ->
 
 -spec url(content(), string()) -> content().
 url(Content, Url) ->
-  Content#{ url => Url}.
+  Content#{url => Url}.
 
 -spec user_id(content()) -> integer().
 user_id(Content) ->

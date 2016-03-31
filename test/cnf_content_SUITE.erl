@@ -110,7 +110,7 @@ double_registration_bad(Config) ->
     _Content -> ct:fail("Unexpected result (!)")
   catch
     throw:duplicated_content -> ok;
-    Error:Reason            -> ct:pal("~p ~p", [Error, Reason])
+    Error:Reason            -> ct:fail("~p ~p", [Error, Reason])
   end.
 
 %% @doc tests for fetch of content

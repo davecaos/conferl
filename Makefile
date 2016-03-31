@@ -7,14 +7,14 @@ TEST_DEPS = shotgun
 SHELL_DEPS = sync
 
 dep_lager        = hex 3.0.2
-dep_sync         = git https://github.com/rustyio/sync.git    9c78e7b
-dep_sumo_db      = git https://github.com/inaka/sumo_db.git   0.3.13
-dep_cowboy       = hex 1.0.4
+dep_cowboy       = git git://github.com/ninenines/cowboy.git     2.0.0-pre.3
 dep_inaka_mixer  = hex 0.1.5
 dep_barrel_jiffy = hex 0.14.4
-dep_shotgun     = git git://github.com/inaka/shotgun.git     0.1.12
-dep_xref_runner = hex 0.2.4
-dep_uuid        = git git://github.com/okeuday/uuid.git      v1.5.1
+dep_shotgun      = hex 0.1.15
+dep_xref_runner  = hex 0.2.4
+dep_sync         = git https://github.com/rustyio/sync.git    9c78e7b
+dep_sumo_db      = git https://github.com/inaka/sumo_db.git   0.3.13
+dep_uuid         = git git://github.com/okeuday/uuid.git      v1.5.1
 
 PLT_APPS := inets
 DIALYZER_DIRS := ebin/

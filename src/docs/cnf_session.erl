@@ -68,11 +68,11 @@ sumo_schema() ->
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%
 %% @doc functions definitions for message
--spec new( integer(), binary()) -> session().
-new(User_id, Token) ->
+-spec new(integer(), binary()) -> session().
+new(UserId, Token) ->
   Now = calendar:universal_time(),
   #{ id         => undefined
-   , user_id    => User_id
+   , user_id    => UserId
    , token      => Token
    , created_at => Now
    , updated_at => Now

@@ -18,13 +18,13 @@
 -type thumb() :: up | down.
 
 -opaque vote() ::
-        #{  id         => integer()
-          , user_id    => integer()
-          , message_id => integer()
-          , thumb      => thumb()
-          , created_at => tuple()
-          , updated_at => tuple()
-         }.
+ #{  id         => integer()
+   , user_id    => integer()
+   , message_id => integer()
+   , thumb      => thumb()
+   , created_at => tuple()
+   , updated_at => tuple()
+  }.
 
 -export_type([vote/0]).
 
@@ -78,9 +78,7 @@ sumo_schema() ->
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%
 %% @doc functions definitions for message
--spec new( integer()
-         , integer()
-         , thumb()) -> vote().
+-spec new( integer(), integer(), thumb()) -> vote().
 new(UserId, MessageId, Thumb) ->
   Now = calendar:universal_time(),
   #{ id         => undefined

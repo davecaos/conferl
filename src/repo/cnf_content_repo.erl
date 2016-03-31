@@ -62,7 +62,7 @@ unregister(Id) ->
 
 -spec fetch(integer()) -> notfound | cnf_content:content().
 fetch(ContentId) ->
-  case sumo:find(cnf_content,ContentId) of
+  case sumo:find(cnf_content, ContentId) of
     notfound  -> throw(notfound);
     Content   -> Content
   end.

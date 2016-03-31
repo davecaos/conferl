@@ -1137,7 +1137,7 @@ pkg_elvis_description = Erlang Style Reviewer
 pkg_elvis_homepage = https://github.com/inaka/elvis
 pkg_elvis_fetch = git
 pkg_elvis_repo = https://github.com/inaka/elvis
-pkg_elvis_commit = 0.2.4
+pkg_elvis_commit = 0.2.6
 
 PACKAGES += emagick
 pkg_emagick_name = emagick
@@ -5992,8 +5992,8 @@ ELVIS_CONFIG ?= $(CURDIR)/elvis.config
 ELVIS ?= $(CURDIR)/elvis
 export ELVIS
 
-ELVIS_URL ?= https://github.com/inaka/elvis/releases/download/0.2.5/elvis
-ELVIS_CONFIG_URL ?= https://github.com/inaka/elvis/releases/download/0.2.5/elvis.config
+ELVIS_URL ?= https://github.com/inaka/elvis/releases/download/0.2.6/elvis
+ELVIS_CONFIG_URL ?= https://github.com/inaka/elvis/releases/download/0.2.6/elvis.config
 ELVIS_OPTS ?=
 
 # Core targets.

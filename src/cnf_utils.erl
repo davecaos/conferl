@@ -35,8 +35,8 @@ datetime_to_binary({{Yi, Mi, Di}, {Hi, Ni, Si}}) ->
   iolist_to_binary([Y, "-", M, "-", D, "T", H, ":", N, ":", S, ".000000Z"]).
 
 -spec handle_exception(atom(), cowboy_req:req(), term()) ->
-  {halt , cowboy_req:req(), term()}
-  | {{false,binary()}, cowboy_req:req(), term()}.
+  {halt, cowboy_req:req(), term()}
+  | {{false, binary()}, cowboy_req:req(), term()}.
 handle_exception(duplicated_user, Req, State) ->
   %{false, Req1, State} is equivalent-> {ok, Req1} = cowboy_req:reply(400, Req),
   {false, Req, State};

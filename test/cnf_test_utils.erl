@@ -25,12 +25,7 @@ api_call(Method, Url, Headers) ->
 
 -spec api_call(atom(), string(), map(), map() | string()) -> {atom(), map()}.
 api_call(Method, Url, Headers, Body) ->
- {ok, Port} = application:get_env(conferl, http_port),
-  {ok, HttpHost} = application:get_env(conferl, http_host),
-  {ok, Pid} = shotgun:open(HttpHost, Port),
-  Response = shotgun:request(Pid, Method, Url, Headers, Body, #{} ),
-  shotgun:close(Pid),
-  Response.
+  api_call(Method, Url, Headers, Body, #{}).
 
 -spec api_call(atom(), string(), map(), map() | string(), map()) ->
   {atom(), map()}.

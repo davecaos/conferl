@@ -19,8 +19,7 @@
 -include_lib("inaka_mixer/include/mixer.hrl").
 -mixin([
         {cnf_default_handler,
-         [ init/3
-         , rest_init/2
+         [ init/2
          , rest_terminate/2
          , content_types_accepted/2
          , content_types_provided/2
@@ -48,10 +47,10 @@ is_authorized(Req, State) ->
 -spec delete_resource(cowboy_req:req(), state()) ->
   {boolean(), cowboy_req:req(), state()}.
 delete_resource(Req, State) ->
-  {Token, Req1} = cowboy_req:binding(token, Req),
+  Token = cowboy_req:binding(token, Req),
   #{user_name := VerifyiedUserName} = State,
   User = cnf_user_repo:find_by_name(VerifyiedUserName),
   Session = cnf_session_repo:find_by_token(Token),
   true = cnf_session:user_id(Session) == cnf_user:id(User),
   cnf_session_repo:unregister(binary_to_list(Token)),
-  {true, Req1, State}.
+  {true, Req, State}.

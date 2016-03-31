@@ -1,7 +1,6 @@
 -module(cnf_default_handler).
 
--export([init/3]).
--export([rest_init/2]).
+-export([init/2]).
 -export([rest_terminate/2]).
 -export([content_types_accepted/2]).
 -export([content_types_provided/2]).
@@ -12,11 +11,8 @@
 -type state() :: #{}.
 %% cowboy
 
-init(_Transport, _Req, _Opts) ->
+init(_Req, _Opts) ->
   {upgrade, protocol, cowboy_rest}.
-
-rest_init(Req, _Opts) ->
-  {ok, Req, #{}}.
 
 rest_terminate(_Req, _State) ->
   ok.
@@ -54,7 +50,7 @@ validation_by_password(UserName, Password) ->
   {boolean() | {boolean(), binary()}, cowboy_req:req(), state()}.
 is_authorized_generic(ValidationFun, Req, State) ->
   case cowboy_req:parse_header(<<"authorization">>, Req) of
-    {ok, {<<"basic">>, {UserName, Authentication}}, _} ->
+    {basic, UserName, Authentication} ->
       try
         NewState = ValidationFun(UserName, Authentication),
         {true, Req, NewState}

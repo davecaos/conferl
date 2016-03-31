@@ -19,8 +19,7 @@
 -include_lib("inaka_mixer/include/mixer.hrl").
 -mixin([
         {cnf_default_handler,
-         [ init/3
-         , rest_init/2
+         [ init/2
          , rest_terminate/2
          , content_types_accepted/2
          , content_types_provided/2
@@ -70,8 +69,8 @@ handle_post(Req, State) ->
 -spec handle_get(cowboy_req:req(), state()) ->
   {list(), cowboy_req:req(), state()}.
 handle_get(Req, State) ->
-  {QueryStringVal, Req2} = cowboy_req:qs_val(<<"domain">>, Req),
+  #{domain := QueryStringVal} = cowboy_req:match_qs([domain], Req),
   RequestContent =
     cnf_content_repo:find_by_domain(binary_to_list(QueryStringVal)),
   Body = cnf_content:to_json(RequestContent),
-  {Body, Req2, State}.
+  {Body, Req, State}.

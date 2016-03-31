@@ -114,7 +114,7 @@ create_token(Header, JsonBody) ->
   #{body := JsonResponseBody} = Response,
   BodyResp = jiffy:decode(JsonResponseBody, [return_maps]),
   #{<<"token">> := Token} = BodyResp,
-  {ok,Token}.
+  {ok, Token}.
 
 -spec post_session_bad(config()) -> config().
 post_session_bad(Config) ->

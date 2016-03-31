@@ -80,7 +80,8 @@ create_session(Config) ->
   #{user_id := _Id
    , token := _Token
    , created_at := _Created
-   , updated_at := _updated } = Session,
+   , updated_at := _Updated 
+   } = Session,
    Config.
 
 -spec delete_session(config()) ->  config().

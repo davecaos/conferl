@@ -83,17 +83,17 @@ sumo_schema() ->
 %%
 %% @doc functions definitions for message
 
--spec new( integer(), integer() | undefined, string(), integer()) -> message().
+-spec new(integer(), integer() | undefined, string(), integer()) -> message().
 new(ContentId, ResponseId, MessageText, User) ->
   Now = calendar:universal_time(),
   #{  id           => undefined
-    , content_id   => ContentId
-    , response_id  => ResponseId
-    , message_text => MessageText
-    , user_id      => User
-    , created_at   => Now
-    , updated_at   => Now
-    }.
+   , content_id   => ContentId
+   , response_id  => ResponseId
+   , message_text => MessageText
+   , user_id      => User
+   , created_at   => Now
+   , updated_at   => Now
+   }.
 
 %% Getters/Setters %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

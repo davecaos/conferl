@@ -19,8 +19,7 @@
 -include_lib("inaka_mixer/include/mixer.hrl").
 -mixin([
         {cnf_default_handler,
-         [ init/3
-         , rest_init/2
+         [ init/2
          , rest_terminate/2
          , content_types_accepted/2
          , content_types_provided/2
@@ -50,14 +49,14 @@ is_authorized(Req, State) ->
 -spec handle_get(cowboy_req:req(), state()) ->
   {list(), cowboy_req:req(), state()}.
 handle_get(Req, State) ->
-  {Id, Req3} = cowboy_req:binding(content_id, Req),
+  Id = cowboy_req:binding(content_id, Req),
   RequestContent = cnf_content_repo:find(list_to_integer(binary_to_list(Id))),
   Body = cnf_content:to_json(RequestContent),
-  {Body, Req3, State}.
+  {Body, Req, State}.
 
 -spec delete_resource(cowboy_req:req(), state()) ->
   {boolean(), cowboy_req:req(), state()}.
 delete_resource(Req, State) ->
-  {Id, Req1} = cowboy_req:binding(content_id, Req),
+  Id = cowboy_req:binding(content_id, Req),
   cnf_content_repo:unregister(list_to_integer(binary_to_list(Id))),
-  {true, Req1, State}.
+  {true, Req, State}.

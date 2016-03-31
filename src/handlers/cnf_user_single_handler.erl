@@ -20,8 +20,7 @@
 
 -mixin([
         {cnf_default_handler,
-         [ init/3
-         , rest_init/2
+         [ init/2
          , rest_terminate/2
          , content_types_accepted/2
          , content_types_provided/2
@@ -48,7 +47,7 @@ is_authorized(Req, State) -> is_authorized_by_token(Req, State).
 -spec handle_get(cowboy_req:req(), state()) ->
   {list(), cowboy_req:req(), state()}.
 handle_get(Req, State) ->
-  {UserId, Req1} = cowboy_req:binding(user_id, Req),
+  UserId = cowboy_req:binding(user_id, Req),
   RequestContent = cnf_user_repo:find(list_to_integer(binary_to_list(UserId))),
   JsonResponseBody = cnf_user:to_json(RequestContent),
-  {JsonResponseBody, Req1, State}.
+  {JsonResponseBody, Req, State}.
