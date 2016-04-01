@@ -51,8 +51,8 @@ all() ->
 
 -spec init_per_suite(config()) -> config().
 init_per_suite(Config) ->
-  application:ensure_all_started(sumo_db),
-  application:ensure_all_started(shotgun),
+  {ok, _} = application:ensure_all_started(sumo_db),
+  {ok, _} = application:ensure_all_started(shotgun),
   sumo:create_schema(),
   lager:start(),
   Config.

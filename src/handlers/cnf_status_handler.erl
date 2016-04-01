@@ -24,10 +24,10 @@ init(Req, _Opts) ->
   {ok, Req, undefined}.
 
 handle(Req, State) ->
-  {ok, Req2} =
+  Req1 =
     cowboy_req:reply(200
                     , [{<<"content-type">>, <<"text/plain">>}]
                     , <<"{\"status\" : \"ok\"}">>
                     , Req),
-  {ok, Req2, State}.
+  {ok, Req1, State}.
 

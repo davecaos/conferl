@@ -52,7 +52,7 @@ all() ->
 
 -spec init_per_suite(config()) -> config().
 init_per_suite(_Config) ->
-  application:ensure_all_started(sumo_db),
+  {ok, _} = application:ensure_all_started(sumo_db),
   sumo:create_schema(),
   lager:start(),
   [].
@@ -103,13 +103,15 @@ test_fetch_vote(Config) ->
 
 -spec test_counts_votes_message(config()) -> config().
 test_counts_votes_message(Config)  ->
-  MessageId = 4,
-  CountVotesUp = 15,
-  CountVotesDown = 30,
-  [cnf_vote_repo:upvote(UserId, MessageId)
-    || UserId <- lists:seq(1, CountVotesUp)],
-  [cnf_vote_repo:downvote(UserId, MessageId)
-    || UserId <- lists:seq(1, CountVotesDown)],
-  #{up := CountVotesUp, down := CountVotesDown} =
-     cnf_vote_repo:counts_votes_message(MessageId),
+  MsgId = 4,
+  VotesUp = 15,
+  VotesDown = 30,
+  UpVotes =
+    [cnf_vote_repo:upvote(UserId, MsgId)|| UserId <- lists:seq(1, VotesUp)],
+  VotesUp = length(UpVotes),
+  DownVotes =
+    [cnf_vote_repo:downvote(UserId, MsgId) || UserId <- lists:seq(1, VotesDown)],
+  VotesDown = length(DownVotes),
+  #{up := VotesUp, down := VotesDown} =
+     cnf_vote_repo:counts_votes_message(MsgId),
   Config.

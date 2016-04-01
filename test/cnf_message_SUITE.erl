@@ -51,7 +51,7 @@ all() ->
 
 -spec init_per_suite(config()) -> config().
 init_per_suite(Config) ->
-  application:ensure_all_started(sumo_db),
+  {ok, _} = application:ensure_all_started(sumo_db),
   sumo:create_schema(),
   get_top_messages_conf().
 
@@ -74,8 +74,11 @@ end_per_testcase(_Function, Config) ->
 -spec top_message_create(config()) -> ok.
 top_message_create(Config) ->
   TopMessages = proplists:get_value(top_messages, Config),
-  [cnf_message_repo:write_top(C, M, U)
-    || {C, M, U} <- TopMessages],
+  FunWriteTop =
+    fun(C, M, U) -> 
+      cnf_message_repo:write_top(C, M, U) 
+    end,
+  _ = [FunWriteTop(C, M, U) || {C, M, U} <- TopMessages],
   ContentId = proplists:get_value(top_messages_content_id, Config),
   PersistedTopMessage = cnf_message_repo:list(ContentId),
   true = all_are_top(PersistedTopMessage),
@@ -86,16 +89,22 @@ test_delete_by_content(Config) ->
   TopMessages = proplists:get_value(top_messages, Config),
   Lenght = length(TopMessages),
   ContentId = proplists:get_value(top_messages_content_id, Config),
-  [cnf_message_repo:write_top(C, M, U)
-    || {C, M, U} <- TopMessages],
+  FunWriteTop =
+    fun(C, M, U) -> 
+      cnf_message_repo:write_top(C, M, U) 
+    end,
+  _ = [FunWriteTop(C, M, U) || {C, M, U} <- TopMessages],
   Lenght = cnf_message_repo:delete_by_content_id(ContentId),
   ok.
 
 -spec test_list_top_message(config()) -> ok.
 test_list_top_message(Config) ->
   TopMessages = proplists:get_value(top_messages, Config),
-  [cnf_message_repo:write_top(C, M, U)
-    || {C, M, U} <- TopMessages],
+  FunWriteTop =
+    fun(C, M, U) -> 
+      cnf_message_repo:write_top(C, M, U) 
+    end,
+  _ = [FunWriteTop(C, M, U) || {C, M, U} <- TopMessages],
   ContentId = proplists:get_value(top_messages_content_id, Config),
   PersistedTopM = cnf_message_repo:list_top_level(ContentId),
   true = all_are_top(PersistedTopM),
@@ -105,13 +114,19 @@ test_list_top_message(Config) ->
 message_replys(Config) ->
   TopM = proplists:get_value(top_messages, Config),
   ReplyM = proplists:get_value(reply_message, Config),
-  PersistedTopMessage = [cnf_message_repo:write_top(C, M, U)
-                          || {C, M, U} <- TopM],
-  [cnf_message_repo:write_reply(C, cnf_message:id(P), M, U)
-    || P <- PersistedTopMessage , {C, _R, M, U} <- ReplyM],
-  MessageListId = [cnf_message:id(P) || P <- PersistedTopMessage],
-  PersistedReplyM = lists:flatten([cnf_message_repo:list_replies(Id)
-                                    || Id <- MessageListId]),
+  FunWriteTop =
+    fun(C, M, U) -> 
+      cnf_message_repo:write_top(C, M, U) 
+    end,
+  PersistedTopMsgs = [FunWriteTop(C, M, U) || {C, M, U} <- TopM],
+  FunWriteRply = 
+    fun(C, P, M, U) -> 
+      cnf_message_repo:write_reply(C, cnf_message:id(P), M, U) 
+    end,
+  _ = [FunWriteRply(C, P, M, U)|| P <- PersistedTopMsgs , {C, _R, M, U} <- ReplyM],
+  MessageListId = [cnf_message:id(P) || P <- PersistedTopMsgs],
+  PersistedReplyM =
+    lists:flatten([cnf_message_repo:list_replies(Id) || Id <- MessageListId]),
   true = all_are_reply(PersistedReplyM),
   Length = length(PersistedReplyM),
   Length = length(TopM) * length(ReplyM),

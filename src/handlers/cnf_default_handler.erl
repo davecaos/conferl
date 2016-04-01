@@ -11,8 +11,8 @@
 -type state() :: #{}.
 %% cowboy
 
-init(_Req, _Opts) ->
-  {upgrade, protocol, cowboy_rest}.
+init(Req, Opts) ->
+  {cowboy_rest, Req, Opts}.
 
 rest_terminate(_Req, _State) ->
   ok.

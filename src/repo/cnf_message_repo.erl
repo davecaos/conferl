@@ -28,7 +28,7 @@
 
 
 -spec write(cnf_messages:message()) -> cnf_messages:message().
-write(Message) -> 
+write(Message) ->
   sumo:persist(cnf_message, Message).
 
 -spec write_top(
@@ -76,7 +76,7 @@ list_top_level(ContentId) ->
   ).
 
 -spec list_by_user(pos_integer()) -> [cnf_messages:message()].
-list_by_user(UserId) -> 
+list_by_user(UserId) ->
   sumo:find_by(cnf_message, [{user, UserId}]).
 
 -spec delete_all() -> integer().

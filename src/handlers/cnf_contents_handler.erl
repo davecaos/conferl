@@ -57,10 +57,10 @@ handle_post(Req, State) ->
     UserId = cnf_session:user_id(cnf_session_repo:find_by_token(Token)),
     Content = cnf_content_repo:register(binary_to_list(Url), UserId),
     Id = cnf_content:id(Content),
-    {Host, Req2} = cowboy_req:url(Req1),
+    Host = cowboy_req:url(Req1),
     Location = [Host, <<"/">>, list_to_binary(integer_to_list(Id))],
-    Req3 = cowboy_req:set_resp_header(<<"Location">>, Location, Req2),
-    {true, Req3, State}
+    Req2 = cowboy_req:set_resp_header(<<"Location">>, Location, Req1),
+    {true, Req2, State}
   catch
     _Type:Exception ->
       cnf_utils:handle_exception(Exception, Req, State)

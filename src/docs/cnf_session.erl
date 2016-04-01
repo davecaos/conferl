@@ -86,7 +86,7 @@ id(Session) ->
 user_id(Session) ->
   maps:get(user_id, Session).
 
--spec token(session()) -> integer().
+-spec token(session()) -> binary().
 token(Session) ->
   maps:get(token, Session).
 

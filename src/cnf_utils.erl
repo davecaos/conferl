@@ -47,17 +47,16 @@ handle_exception(not_registered, Req, State) ->
 handle_exception(duplicated_content, Req, State) ->
   {false, Req, State};
 handle_exception(not_found, Req, State) ->
-  {ok, Req1} = cowboy_req:reply(404, Req),
+  Req1 = cowboy_req:reply(404, Req),
   {halt, Req1, State};
 handle_exception(Reason, Req, State) ->
-  lager:error("~p. Stack Trace: ~p", [Reason, erlang:get_stacktrace()]),
-  {ok, Req1} =
+  Req1 =
     try cowboy_req:reply(501, Req)
     catch
       _:Error ->
-        lager:critical(
-          "~p trying to report error through cowboy. Stack Trace: ~p",
-          [Error, erlang:get_stacktrace()]),
-        {ok, Req}
+        _ = lager:critical(
+          "~p trying to report error through cowboy. Stack T: ~p Reason: ~p",
+          [Error, erlang:get_stacktrace(), Reason]),
+        Req
     end,
   {halt, Req1, State}.

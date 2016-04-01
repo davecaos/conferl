@@ -49,9 +49,9 @@ all() ->
 
 -spec init_per_suite(config()) -> config().
 init_per_suite(_Config) ->
-  application:ensure_all_started(sumo_db),
-  application:ensure_all_started(uuid),
-  application:ensure_all_started(lager),
+  {ok, _} = application:ensure_all_started(sumo_db),
+  {ok, _} = application:ensure_all_started(uuid),
+  {ok, _} = application:ensure_all_started(lager),
   sumo:create_schema(),
   lager:start(),
   [].
@@ -80,7 +80,7 @@ create_session(Config) ->
   #{user_id := _Id
    , token := _Token
    , created_at := _Created
-   , updated_at := _Updated 
+   , updated_at := _Updated
    } = Session,
    Config.
 

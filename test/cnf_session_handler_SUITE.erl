@@ -51,9 +51,9 @@ all() ->
 
 -spec init_per_suite(config()) -> config().
 init_per_suite(Config) ->
-  application:ensure_all_started(sumo_db),
-  application:ensure_all_started(uuid),
-  application:ensure_all_started(lager),
+  {ok, _} = application:ensure_all_started(sumo_db),
+  {ok, _} = application:ensure_all_started(uuid),
+  {ok, _} = application:ensure_all_started(lager),
   sumo:create_schema(),
   lager:start(),
   Config.
@@ -137,8 +137,10 @@ delete_session(Config) ->
   RegistedUser = cnf_user_repo:register(UserName, Passsword, Email),
   Session = cnf_session_repo:register(cnf_user:id(RegistedUser)),
   Token = binary_to_list(cnf_session:token(Session)),
-  Header = #{<<"Content-Type">> => <<"application/json">>
-            , basic_auth => {UserName, Passsword}},
+  Header = 
+    #{ <<"Content-Type">> => <<"application/json">>
+     , basic_auth => {UserName, Passsword}
+     },
   Body = #{},
   JsonBody = jiffy:encode(Body),
   {ok, Response} =
