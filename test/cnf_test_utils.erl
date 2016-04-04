@@ -43,7 +43,3 @@ get_server_url() ->
   {ok, Port} = application:get_env(conferl, http_port),
   PortBinary = list_to_binary(integer_to_list(Port)),
   <<"http://localhost:", PortBinary/binary>>.
-
-
-
-

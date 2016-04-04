@@ -45,10 +45,12 @@ start(_StartType, _StartArgs) ->
   Dispatch = cowboy_router:compile( [{'_' , EndPoints}]),
   {ok, Port} = application:get_env(conferl, http_port),
   {ok, HttpListenersCount} = application:get_env(conferl, http_listener_count),
-  cowboy:start_http(my_http_listener
-                   , HttpListenersCount
-                   , [{port, Port}]
-                   , [{env, [{dispatch, Dispatch}]}]),
+  {ok, _} =
+   cowboy:start_http( my_http_listener
+                    , HttpListenersCount
+                    , [{port, Port}]
+                    , [{env, [{dispatch, Dispatch}]}]
+                    ),
 
   conferl_sup:start_link().
 

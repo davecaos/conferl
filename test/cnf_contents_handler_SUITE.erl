@@ -72,7 +72,8 @@ end_per_testcase(_Function, Config) ->
 
 -spec test_handle_post_ok(config()) -> config().
 test_handle_post_ok(Config) ->
-  User = cnf_user_repo:register("post_ok", "password", "mail@email.net"),
+  User =
+    cnf_user_repo:register(<<"post_ok">>, <<"pass">>, <<"mail@email.net">>),
   Id = cnf_user:id(User),
   Session = cnf_session_repo:register(Id),
   Token = binary_to_list(cnf_session:token(Session)),
@@ -88,14 +89,16 @@ test_handle_post_ok(Config) ->
   #{headers := ResponseHeaders} = Response,
   Location = proplists:get_value(<<"location">>, ResponseHeaders),
   Url = cnf_test_utils:get_server_url(),
-  EndpointUrl = <<Url/binary, "/contents/">>,
+  UrlSize =  byte_size(Url),
+  EndpointUrl = <<Url:UrlSize/binary, "/contents/">>,
   Size = byte_size(EndpointUrl),
   <<EndpointUrl:Size/binary, _Id/binary>> = Location,
   Config.
 
 -spec test_handle_post_duplicated(config()) -> config().
 test_handle_post_duplicated(Config) ->
-  User = cnf_user_repo:register("post_dupl", "password", "mail@email.net"),
+  User =
+    cnf_user_repo:register(<<"post_dupl">>, <<"pass">>, <<"mail@email.net">>),
   Session = cnf_session_repo:register(cnf_user:id(User)),
   Token = binary_to_list(cnf_session:token(Session)),
   Header =
@@ -104,7 +107,8 @@ test_handle_post_duplicated(Config) ->
     },
   Body = #{ url => <<"http://inaka.net/post_dup">>},
   JsonBody = jiffy:encode(Body),
-  _ = cnf_content_repo:register("http://inaka.net/post_dup", cnf_user:id(User)),
+  Id = cnf_user:id(User),
+  _ = cnf_content_repo:register("http://inaka.net/post_dup", Id),
   {ok, Response} =
     cnf_test_utils:api_call(post, "/contents", Header,  JsonBody),
   #{status_code := 400} = Response,
@@ -112,35 +116,39 @@ test_handle_post_duplicated(Config) ->
 
 -spec test_get_qs_ok(config()) -> config().
 test_get_qs_ok(Config) ->
-  User = cnf_user_repo:register("get_qs_ok", "password", "mail@email.net"),
+  User    = cnf_user_repo:register("get_qs_ok", "pass", "mail@email.net"),
   Session = cnf_session_repo:register(cnf_user:id(User)),
-  Token = binary_to_list(cnf_session:token(Session)),
+  Token   = binary_to_list(cnf_session:token(Session)),
   Header =
    #{ <<"Content-Type">> => <<"text/plain; charset=utf-8">>
     , basic_auth => {"get_qs_ok", Token}
     },
-  _ = cnf_content_repo:register("http://inaka.net/get_qs_ok", 1),
-  _ = cnf_content_repo:register("https://twitter.com/get_qs_ok", 1),
-  DomainInaka = "inaka.net",
-  DomainTwitter = "twitter.com",
-  UrlInaka = "/contents/?domain=" ++  DomainInaka,
+  UrlPostInaka   = "http://inaka.net/get_qs_ok",
+  UrlPostTwitter = "https://twitter.com/get_qs_ok",
+  ContentInaka   = cnf_content_repo:register(UrlPostInaka, 1),
+  ContentTwitter = cnf_content_repo:register(UrlPostTwitter, 1),
+  DomainInaka    = "inaka.net" = cnf_content:domain(ContentInaka),
+  DomainTwitter  = "twitter.com" = cnf_content:domain(ContentTwitter),
+  UrlInaka = "/contents/?domain=" ++ DomainInaka,
   {ok, ResponseInaka} = cnf_test_utils:api_call(get, UrlInaka, Header),
   #{status_code := 200} = ResponseInaka,
   #{body := JsonBodyRespInaka} = ResponseInaka,
   BodyRespInaka = jiffy:decode(JsonBodyRespInaka, [return_maps]),
-  UrlTwitter = "/contents/?domain=" ++  DomainTwitter,
-  F1 = fun(DomainMap) ->
-         #{<<"domain">> := Domain} = DomainMap,
-         Domain = <<"inaka.net">>
-       end,
+  UrlTwitter = "/contents/?domain=" ++ DomainTwitter,
+  F1 =
+   fun(DomainMap) ->
+      #{<<"domain">> := Domain} = DomainMap,
+      Domain = <<"inaka.net">>
+   end,
   ok = lists:foreach(F1, BodyRespInaka),
   {ok, ResponseTwitter} = cnf_test_utils:api_call(get, UrlTwitter, Header),
   #{body := JsonBodyRespTwitter} = ResponseTwitter,
   BodyRespTwitter = jiffy:decode(JsonBodyRespTwitter, [return_maps]),
-  F2 = fun(DomainMap) ->
-         #{<<"domain">> := Domain} = DomainMap,
-         Domain = <<"twitter.com">>
-       end,
+  F2 =
+   fun(DomainMap) ->
+     #{<<"domain">> := Domain} = DomainMap,
+     Domain = <<"twitter.com">>
+   end,
   ok = lists:foreach(F2, BodyRespTwitter),
   #{status_code := 200} = ResponseTwitter,
   Config.

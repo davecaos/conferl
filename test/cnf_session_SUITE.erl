@@ -53,7 +53,6 @@ init_per_suite(_Config) ->
   {ok, _} = application:ensure_all_started(uuid),
   {ok, _} = application:ensure_all_started(lager),
   sumo:create_schema(),
-  lager:start(),
   [].
 
 -spec end_per_suite(config()) -> config().
@@ -77,8 +76,8 @@ create_session(Config) ->
   Email = <<"email">>,
   RegistedUser = cnf_user_repo:register(UserName, Passsword, Email),
   Session = cnf_session_repo:register(cnf_user:id(RegistedUser)),
-  #{user_id := _Id
-   , token := _Token
+  #{ user_id    := _Id
+   , token      := _Token
    , created_at := _Created
    , updated_at := _Updated
    } = Session,
@@ -91,7 +90,7 @@ delete_session(Config) ->
   Email = <<"email">>,
   RegistedUser = cnf_user_repo:register(UserName, Passsword, Email),
   Session = cnf_session_repo:register(cnf_user:id(RegistedUser)),
-  1  = cnf_session_repo:unregister(cnf_session:token(Session)),
+  1 = cnf_session_repo:unregister(cnf_session:token(Session)),
   try cnf_session_repo:find_by_user(cnf_session:user_id(Session)) of
     _Content -> ct:fail("Unexpected result (!)")
   catch

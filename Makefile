@@ -1,21 +1,22 @@
 PROJECT = conferl
 
-DEPS = lager cowboy  shotgun sumo_db inaka_mixer barrel_jiffy xref_runner uuid
+DEPS = lager cowboy sumo_db inaka_mixer barrel_jiffy xref_runner uuid goldrush
 
 TEST_DEPS = shotgun katana_test
 
 SHELL_DEPS = sync
 
 dep_lager        = hex 3.0.2
-dep_cowboy       = git git://github.com/ninenines/cowboy.git  2.0.0-pre.3
+dep_cowboy       = git https://github.com/ninenines/cowboy.git  2.0.0-pre.3
 dep_inaka_mixer  = hex 0.1.5
 dep_barrel_jiffy = hex 0.14.4
 dep_shotgun      = hex 0.2.3
 dep_xref_runner  = hex 0.2.4
-dep_sync         = git https://github.com/rustyio/sync.git     9c78e7b
-dep_sumo_db      = git https://github.com/inaka/sumo_db.git    0.4.0
-dep_uuid         = git git://github.com/okeuday/uuid.git       v1.5.1
-dep_katana_test = git https://github.com/inaka/katana-test.git 0.0.5
+dep_sync         = git https://github.com/rustyio/sync.git      9c78e7b
+dep_sumo_db      = git https://github.com/inaka/sumo_db.git     0.4.0
+dep_uuid         = git https://github.com/okeuday/uuid.git      v1.5.1
+dep_katana_test  = git https://github.com/inaka/katana-test.git 0.0.5
+dep_goldrush     = git https://github.com/DeadZen/goldrush      0.1.8
 
 PLT_APPS := inets
 DIALYZER_DIRS := ebin/

@@ -104,9 +104,10 @@ delete_user_attack(Config) ->
     cnf_user_repo:register(UserNameAttacker, PassswordHacker, Email),
   SessionHacker = cnf_session_repo:register(cnf_user:id(RegistedUserhacker)),
   TokenHacker = binary_to_list(cnf_session:token(SessionHacker)),
-
-  Header = #{ <<"Content-Type">> => <<"application/json">>
-            , basic_auth => {UserNameAttacker, Token}},
+  Header =
+   #{ <<"Content-Type">> => <<"application/json">>
+    , basic_auth => {UserNameAttacker, Token}
+    },
   Body = #{},
   JsonBody = jiffy:encode(Body),
   Respuesta =

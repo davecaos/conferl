@@ -51,7 +51,7 @@ all() ->
 
 -spec init_per_suite(config()) -> config().
 init_per_suite(Config) ->
-  application:ensure_all_started(sumo_db),
+  {ok, _} = application:ensure_all_started(sumo_db),
   sumo:create_schema(),
   Config.
 
@@ -78,7 +78,7 @@ init_per_testcase(test_list_contents, Config)  ->
         , {"http://yahoo.com/",    14}
         , {"https://github.com",   15}
         ]}
-  , {domain, "inaka.net" } | Config ];
+  , {domain, <<"inaka.net">> } | Config ];
 
 init_per_testcase(_, Config)  ->
   Config.
@@ -88,26 +88,28 @@ init_per_testcase(_, Config)  ->
 test_create_content(Config) ->
   Url     = proplists:get_value(url, Config),
   User    = proplists:get_value(user, Config),
-  cnf_content:new(Url, User).
+  _Content = cnf_content:new(Url, User),
+  ok.
 
 -spec test_create_user_bad(config()) -> ok.
 test_create_user_bad(Config) ->
   Url     = proplists:get_value(url, Config),
   User    = proplists:get_value(user, Config),
   try cnf_content:new(Url, User) of
-    _Content -> ct:fail("Unexpected result (!)")
+    _NotExpected -> ct:fail("Unexpected result (!)")
   catch
     throw:invalid_url -> ok
-  end.
+  end,
+  ok.
 
 %% @doc tests for register
 -spec double_registration_bad(config()) -> ok.
 double_registration_bad(Config) ->
-  Url     = proplists:get_value(url, Config),
-  User    = proplists:get_value(user, Config),
-  cnf_content_repo:register(Url, User),
+  Url      = proplists:get_value(url, Config),
+  User     = proplists:get_value(user, Config),
+  _Content = cnf_content_repo:register(Url, User),
   try cnf_content_repo:register(Url, User) of
-    _Content -> ct:fail("Unexpected result (!)")
+    _NotExpected -> ct:fail("Unexpected result (!)")
   catch
     throw:duplicated_content -> ok;
     Error:Reason            -> ct:fail("~p ~p", [Error, Reason])
@@ -118,7 +120,7 @@ double_registration_bad(Config) ->
 fetch_notfound_content(Config) ->
   ContentId   = proplists:get_value(id, Config),
   try cnf_content_repo:fetch(ContentId) of
-    _Content -> ct:fail("Unexpected result (!)")
+    _NotExpected -> ct:fail("Unexpected result (!)")
   catch
     throw:notfound  -> ok
   end.
@@ -127,10 +129,12 @@ fetch_notfound_content(Config) ->
 -spec test_list_contents(config()) -> ok.
 test_list_contents(Config) ->
   Urls      = proplists:get_value(urls, Config),
-  [cnf_content_repo:register(Url, User) || {Url, User} <- Urls ],
+  _Contents = [cnf_content_repo:register(Url, User) || {Url, User} <- Urls ],
   Domain    = proplists:get_value(domain, Config),
   Contents  = cnf_content_repo:list(Domain),
-  FilterFun = fun(Cont) ->
-                maps:get(domain, Cont) == proplists:get_value(domain, Config)
-              end,
-  [ ct:fail("Unexpected result (!)") || lists:all( FilterFun , Contents)].
+  FilterFun =
+    fun(Cont) ->
+      maps:get(domain, Cont) == proplists:get_value(domain, Config)
+    end,
+  true = lists:all(FilterFun, Contents),
+  ok.

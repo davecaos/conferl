@@ -17,9 +17,9 @@
 
 -opaque user() ::
   #{  id         => integer()
-    , user_name  => binary()
-    , password   => binary()
-    , email      => binary()
+    , user_name  => iodata()
+    , password   => iodata()
+    , email      => iodata()
     , created_at => tuple()
     , updated_at => tuple()
     }.
@@ -79,7 +79,7 @@ sumo_schema() ->
 %%
 %% @doc functions definitions for user
 
--spec new( binary(), binary(), binary()) -> user().
+-spec new(iodata(), iodata(), iodata()) -> user().
 new(UserName, Password, Email) ->
   Now = calendar:universal_time(),
   #{ id         => undefined
@@ -93,27 +93,27 @@ new(UserName, Password, Email) ->
 -spec id(user()) -> integer().
 id(User) -> maps:get(id, User).
 
--spec user_name(user()) -> binary().
+-spec user_name(user()) -> iodata().
 user_name(User) ->
   maps:get(user_name, User).
 
--spec user_name(user(), binary()) -> user().
+-spec user_name(user(), iodata()) -> user().
 user_name(User, UserName) ->
   User#{user_name => UserName}.
 
--spec password(user()) -> binary().
+-spec password(user()) -> iodata().
 password(User) ->
   maps:get(password, User).
 
--spec password(user(), binary()) -> user().
+-spec password(user(), iodata()) -> user().
 password(User, Password) ->
   User#{password => Password}.
 
--spec email(user()) -> binary().
+-spec email(user()) -> iodata().
 email(User) ->
   maps:get(email, User).
 
--spec email(user(), binary()) -> user().
+-spec email(user(), iodata()) -> user().
 email(User, Email) ->
   User#{email => Email}.
 

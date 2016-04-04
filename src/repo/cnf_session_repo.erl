@@ -27,7 +27,7 @@ register(UserId) ->
   NewSession = cnf_session:new(UserId, NewToken),
   sumo:persist(cnf_session, NewSession).
 
--spec unregister(string()) -> non_neg_integer().
+-spec unregister(iodata()) -> non_neg_integer().
 unregister(Token) ->
   sumo:delete_by(cnf_session, [{token, Token}]).
 
@@ -39,7 +39,7 @@ find_by_user(UserId) ->
     [User] -> User
   end.
 
--spec find_by_token(binary()) -> cnf_session:session().
+-spec find_by_token(iodata()) -> cnf_session:session().
 find_by_token(Token) ->
   Result =  sumo:find_by(cnf_session, [{token, Token}]),
   case Result of
@@ -47,10 +47,10 @@ find_by_token(Token) ->
     [User] -> User
   end.
 
--spec generate_token() -> binary().
+-spec generate_token() -> iodata().
 generate_token() -> erlang:list_to_binary(uuid:uuid_to_string(uuid:get_v4())).
 
--spec is_valid(string(), binary()) -> boolean().
+-spec is_valid(iodata(), iodata()) -> boolean().
 is_valid(UserName, Token) ->
   try
     Session = find_by_token(Token),

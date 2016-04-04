@@ -19,7 +19,7 @@
   #{ id           => integer()
    , content_id   => integer()
    , response_id  => integer()
-   , message_text => string()
+   , message_text => iodata()
    , user_id      => integer()
    , created_at   => tuple()
    , updated_at   => tuple()
@@ -83,7 +83,7 @@ sumo_schema() ->
 %%
 %% @doc functions definitions for message
 
--spec new(integer(), integer() | undefined, string(), integer()) -> message().
+-spec new(integer(), integer() | undefined, iodata(), integer()) -> message().
 new(ContentId, ResponseId, MessageText, User) ->
   Now = calendar:universal_time(),
   #{  id           => undefined
@@ -109,19 +109,19 @@ content_id(Message) ->
 response_id(Message) ->
   maps:get(response_id, Message).
 
--spec message_text(message()) -> string().
+-spec message_text(message()) -> iodata().
 message_text(Message) ->
   maps:get(message_text, Message).
 
--spec message_text(message(), string()) -> message().
+-spec message_text(message(), iodata()) -> message().
 message_text(Message, MessageText) ->
  Message#{ message_text => MessageText}.
 
--spec user_id(message()) -> string().
+-spec user_id(message()) -> iodata().
 user_id(Message) ->
   maps:get(user_id, Message).
 
--spec user_id(message(), string()) -> message().
+-spec user_id(message(), iodata()) -> message().
 user_id(Message, MessageText) ->
  Message#{user_id => MessageText}.
 
