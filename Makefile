@@ -1,6 +1,6 @@
 PROJECT = conferl
 
-DEPS = lager cowboy sumo_db inaka_mixer barrel_jiffy xref_runner uuid goldrush
+DEPS = lager cowboy sumo_db inaka_mixer jiffy xref_runner uuid goldrush
 
 TEST_DEPS = shotgun katana_test
 
@@ -9,7 +9,7 @@ SHELL_DEPS = sync
 dep_lager        = hex 3.0.2
 dep_cowboy       = git https://github.com/ninenines/cowboy.git  2.0.0-pre.3
 dep_inaka_mixer  = hex 0.1.5
-dep_barrel_jiffy = hex 0.14.4
+dep_jiffy        = git https://github.com/davisp/jiffy.git      0.14.8
 dep_shotgun      = hex 0.2.3
 dep_xref_runner  = hex 0.2.4
 dep_sync         = git https://github.com/rustyio/sync.git      9c78e7b
