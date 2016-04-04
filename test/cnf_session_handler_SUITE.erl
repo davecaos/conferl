@@ -72,12 +72,16 @@ end_per_testcase(_Function, Config) ->
 
 -spec post_session(config()) -> config().
 post_session(Config) ->
-  UserName = "Doge post_session",
-  Passsword = "passsword",
-  Email = "email@email.net",
-  _User = cnf_user_repo:register(UserName, Passsword, Email),
-  Header = #{ <<"Content-Type">> => <<"application/json">>
-            , basic_auth => {UserName, Passsword}},
+  UserName  = <<"Doge post_session">>,
+  Password = <<"passsword">>,
+  Email     = <<"email@email.net">>,
+  _User     = cnf_user_repo:register(UserName, Password, Email),
+  UserNameString  = binary_to_list(UserName),
+  PasswordString  = binary_to_list(Password),
+  Header =
+   #{ <<"Content-Type">> => <<"application/json">>
+    , basic_auth => {UserNameString, PasswordString}
+    },
   Body = #{},
   JsonBody = jiffy:encode(Body),
   {ok, Response} =
@@ -90,13 +94,15 @@ post_session(Config) ->
 
 -spec post_multiple_session(config()) -> term().
 post_multiple_session(_Config) ->
-  UserName  = "Doge post_multiple_session",
-  Passsword = "passsword",
-  Email = "email@email.net",
-  _User = cnf_user_repo:register(UserName, Passsword, Email),
+  UserName = <<"Doge post_multiple_session">>,
+  Password = <<"passsword">>,
+  Email    = <<"email@email.net">>,
+  _User    = cnf_user_repo:register(UserName, Password, Email),
+  UserNameString  = binary_to_list(UserName),
+  PasswordString  = binary_to_list(Password),
   Header =
    #{ <<"Content-Type">> => <<"application/json">>
-    , basic_auth => {UserName, Passsword}
+    , basic_auth => {UserNameString, PasswordString}
     },
   Body = #{},
   JsonBody = jiffy:encode(Body),
@@ -118,11 +124,13 @@ create_token(Header, JsonBody) ->
 
 -spec post_session_bad(config()) -> config().
 post_session_bad(Config) ->
-  UserName  = "No registered Doge",
-  Passsword = "passsword",
-  Header    =
+  UserName  = <<"No registered Doge">>,
+  Password  = <<"passsword">>,
+  UserNameString  = binary_to_list(UserName),
+  PasswordString  = binary_to_list(Password),
+  Header =
     #{ <<"Content-Type">> => <<"application/json">>
-     , basic_auth => {UserName, Passsword}
+     , basic_auth => {UserNameString, PasswordString}
      },
   Body = #{},
   JsonBody = jiffy:encode(Body),
@@ -133,15 +141,17 @@ post_session_bad(Config) ->
 
 -spec delete_session(config()) -> config().
 delete_session(Config) ->
-  UserName  = "Doge delete_session",
-  Passsword = "passsword",
-  Email     = "email@email.net",
-  RegistedUser = cnf_user_repo:register(UserName, Passsword, Email),
+  UserName  = <<"Doge delete_session">>,
+  Password = <<"passsword">>,
+  Email     = <<"email@email.net">>,
+  RegistedUser = cnf_user_repo:register(UserName, Password, Email),
   Session = cnf_session_repo:register(cnf_user:id(RegistedUser)),
   Token = binary_to_list(cnf_session:token(Session)),
+  UserNameString  = binary_to_list(UserName),
+  PasswordString  = binary_to_list(Password),
   Header =
     #{ <<"Content-Type">> => <<"application/json">>
-     , basic_auth => {UserName, Passsword}
+     , basic_auth => {UserNameString, PasswordString}
      },
   Body = #{},
   JsonBody = jiffy:encode(Body),

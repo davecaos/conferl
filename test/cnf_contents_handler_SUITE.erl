@@ -116,8 +116,11 @@ test_handle_post_duplicated(Config) ->
 
 -spec test_get_qs_ok(config()) -> config().
 test_get_qs_ok(Config) ->
-  User    = cnf_user_repo:register("get_qs_ok", "pass", "mail@email.net"),
-  Session = cnf_session_repo:register(cnf_user:id(User)),
+  UserName = <<"get_qs_ok">>,
+  Password = <<"password">>,
+  Email    = <<"mail@email.net">>,
+  UserEntity = cnf_user_repo:register(UserName, Password, Email),
+  Session = cnf_session_repo:register(cnf_user:id(UserEntity)),
   Token   = binary_to_list(cnf_session:token(Session)),
   Header =
    #{ <<"Content-Type">> => <<"text/plain; charset=utf-8">>

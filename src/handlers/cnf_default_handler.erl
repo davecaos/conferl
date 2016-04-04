@@ -36,12 +36,12 @@ is_authorized_by_token(Req, State) ->
 is_authorized_by_password(Req, State) ->
   is_authorized_generic(fun validation_by_password/2, Req, State).
 
--spec validation_by_token(string(), binary()) -> map().
+-spec validation_by_token(binary(), binary()) -> map().
 validation_by_token(UserName, Token) ->
   true = cnf_session_repo:is_valid(UserName, Token),
   #{user_name => UserName, token => Token}.
 
--spec validation_by_password(string(), string()) -> map().
+-spec validation_by_password(binary(), binary()) -> map().
 validation_by_password(UserName, Password) ->
   true = cnf_user_repo:is_registered(UserName, Password),
   #{user_name => UserName}.

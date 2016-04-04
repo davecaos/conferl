@@ -21,7 +21,7 @@
 -export([find_by_name/1]).
 -export([is_registered/2]).
 
--spec register(iodata(), iodata(), iodata()) -> cnf_user:user().
+-spec register(binary(), binary(), binary()) -> cnf_user:user().
 register(UserName, Password, Email) ->
   try find_by_name(UserName) of
     _   -> throw(duplicated_user)
@@ -31,7 +31,7 @@ register(UserName, Password, Email) ->
       sumo:persist(cnf_user, NewUser)
   end.
 
--spec unregister(iodata()) -> non_neg_integer().
+-spec unregister(binary()) -> non_neg_integer().
 unregister(UserName) ->
   Result = sumo:delete_by(cnf_user, [{user_name, UserName}]),
   case Result of
@@ -43,7 +43,7 @@ unregister(UserName) ->
 find(UserId) ->
   sumo:find(cnf_user, UserId).
 
--spec find_by_name(iodata()) -> cnf_user:user().
+-spec find_by_name(binary()) -> cnf_user:user().
 find_by_name(UserName) ->
   Result = sumo:find_by(cnf_user, [{user_name, UserName}]),
   case Result of
@@ -51,7 +51,7 @@ find_by_name(UserName) ->
     [User] -> User
   end.
 
--spec is_registered(iodata(), iodata()) -> true.
+-spec is_registered(binary(), binary()) -> true.
 is_registered(UserName, Password) ->
   try find_by_name(UserName) of
     #{password := Password} -> true;
