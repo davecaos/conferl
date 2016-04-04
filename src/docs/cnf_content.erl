@@ -16,8 +16,8 @@
 
 -opaque content() ::
         #{  id         => integer()
-          , url        => iodata()
-          , domain     => iodata()
+          , url        => binary()
+          , domain     => binary()
           , user_id    => integer()
           , created_at => tuple()
           , updated_at => tuple()
@@ -67,11 +67,18 @@ get_domain(Url) ->
 
 -spec sumo_wakeup(sumo:doc()) -> content().
 sumo_wakeup(Data) ->
-  truncate_seconds(Data).
+  Domain = maps:get(domain, Data),
+  Url    = maps:get(url, Data),
+  truncate_seconds(
+    Data#{url => binary_to_list(Url), domain => binary_to_list(Domain)}
+  ).
 
 %% @doc Part of the sumo_doc behavior.
 -spec sumo_sleep(content()) -> sumo:doc().
-sumo_sleep(Content) -> Content.
+sumo_sleep(Content) ->
+  Domain = maps:get(domain, Content),
+  Url    = maps:get(url, Content),
+Content#{url => list_to_binary(Url), domain => list_to_binary(Domain)}.
 
 %% @doc Part of the sumo_doc behavior.
 -spec sumo_schema() -> sumo:schema().
@@ -122,11 +129,11 @@ user_id(Content) ->
 user_id(Content, User) ->
   Content#{user_id => User}.
 
--spec domain(content()) -> iodata().
+-spec domain(content()) -> string().
 domain(Content) ->
   maps:get(domain, Content).
 
--spec domain(content(), iodata()) -> content().
+-spec domain(content(), string()) -> content().
 domain(Content, Domain) ->
   Content#{domain => Domain}.
 
@@ -148,25 +155,22 @@ updated_at(Content, UpdatedAt) ->
 
 -spec to_json(content() | [content()]) -> content() | [content()].
 to_json(Content) when is_map(Content) ->
-  jiffy:encode(doc_to_iodata_date(Content));
+  jiffy:encode(doc_to_binary_date(Content));
 to_json(ListContents) when is_list(ListContents) ->
-  JsonListContents = lists:map(fun doc_to_iodata_date/1, ListContents),
+  JsonListContents = lists:map(fun doc_to_binary_date/1, ListContents),
   jiffy:encode(JsonListContents).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Private Api
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%
-%%
--spec doc_to_iodata_date(map()) -> map().
-doc_to_iodata_date(Content) ->
-  CreatedAtiodata = cnf_utils:datetime_to_binary(created_at(Content)),
-  UpdatedAtiodata = cnf_utils:datetime_to_binary(updated_at(Content)),
-  Content#{created_at => CreatedAtiodata, updated_at => UpdatedAtiodata}.
+-spec doc_to_binary_date(map()) -> map().
+doc_to_binary_date(Content) ->
+  CreatedAtbinary = cnf_utils:datetime_to_binary(created_at(Content)),
+  UpdatedAtbinary = cnf_utils:datetime_to_binary(updated_at(Content)),
+  Content#{created_at => CreatedAtbinary, updated_at => UpdatedAtbinary}.
 
 -spec truncate_seconds(content()) -> content().
 truncate_seconds(Content) ->
   CreatedAt = cnf_utils:truncate_seconds(created_at(Content)),
   UpdatedAt = cnf_utils:truncate_seconds(updated_at(Content)),
   Content#{updated_at => UpdatedAt, created_at => CreatedAt}.
-

@@ -1139,6 +1139,7 @@ pkg_elvis_fetch = git
 pkg_elvis_repo = https://github.com/inaka/elvis
 pkg_elvis_commit = 0.2.6
 
+
 PACKAGES += emagick
 pkg_emagick_name = emagick
 pkg_emagick_description = Wrapper for Graphics/ImageMagick command line tool.

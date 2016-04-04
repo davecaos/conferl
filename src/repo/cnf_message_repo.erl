@@ -32,7 +32,7 @@ write(Message) ->
   sumo:persist(cnf_message, Message).
 
 -spec write_top(
-  integer(), string(), integer()
+  integer(), binary(), integer()
 ) -> cnf_messages:message().
 write_top(ContentId, MessageText, User) ->
   TopLevelResponseId = undefined,
@@ -43,7 +43,7 @@ write_top(ContentId, MessageText, User) ->
   sumo:persist(cnf_message, Message).
 
 -spec write_reply(
-  integer(), integer(), string(), integer()
+  integer(), integer(), binary(), integer()
 ) -> cnf_messages:message().
 write_reply(ContentId, ResponseId, MessageText, User) ->
   Message =
