@@ -46,11 +46,11 @@ start(_StartType, _StartArgs) ->
   {ok, Port} = application:get_env(conferl, http_port),
   {ok, HttpListenersCount} = application:get_env(conferl, http_listener_count),
   {ok, _} =
-   cowboy:start_http( my_http_listener
-                    , HttpListenersCount
-                    , [{port, Port}]
-                    , [{env, [{dispatch, Dispatch}]}]
-                    ),
+    cowboy:start_http( my_http_listener
+                     , HttpListenersCount
+                     , [{port, Port}]
+                     , [{env, [{dispatch, Dispatch}]}]
+                     ),
 
   conferl_sup:start_link().
 
