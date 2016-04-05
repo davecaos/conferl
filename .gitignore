@@ -1,5 +1,7 @@
 .eunit
 deps
+logs
+log
 *.o
 *.beam
 *.plt
@@ -8,5 +10,8 @@ ebin
 rel/example_project
 .concrete/DEV_MODE
 .rebar
+.erlang.mk/
 .erlang.mk.packages.v2
 elvis
+hexer.config
+conferl.d

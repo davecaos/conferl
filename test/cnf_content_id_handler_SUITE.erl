@@ -48,10 +48,10 @@ all() ->
 
 -spec init_per_suite(config()) -> config().
 init_per_suite(Config) ->
-  application:ensure_all_started(conferl),
-  application:ensure_all_started(shotgun),
+  {ok, _} = application:ensure_all_started(conferl),
+  {ok, _} = application:ensure_all_started(shotgun),
   sumo:create_schema(),
-  cnf_user_repo:register("user", "password", "email@inaka.net"),
+  _ = cnf_user_repo:register(<<"user">>, <<"password">>, <<"email@inaka.net">>),
   Config.
 
 -spec end_per_suite(config()) -> config().
@@ -72,33 +72,41 @@ end_per_testcase(_Function, Config) ->
 
 -spec test_get_ok(config()) -> config().
 test_get_ok(Config) ->
-  UserName = "Doge get_ok",
-  Passsword = "passsword",
-  Email = "email@email.net",
-  User = cnf_user_repo:register(UserName, Passsword, Email),
+  UserName = <<"get_ok">>,
+  Password = <<"password">>,
+  Email    = <<"email@email.net">>,
+  User = cnf_user_repo:register(UserName, Password, Email),
   Session = cnf_session_repo:register(cnf_user:id(User)),
-  Token = binary_to_list(cnf_session:token(Session)),
-  Header = #{ <<"Content-Type">> => <<"application/json">>
-            , basic_auth => {UserName, Token}},
-  Content =
-    cnf_content_repo:register("http://inaka.net/get_ok", cnf_user:id(User)),
-  Url = "/contents/" ++  integer_to_list(cnf_content:id(Content)),
+  TokenString    = binary_to_list(cnf_session:token(Session)),
+  UserNameString = binary_to_list(UserName),
+  Header =
+    #{ <<"Content-Type">> => <<"application/json">>
+     , basic_auth => {UserNameString, TokenString}
+     },
+  IdUser  = cnf_user:id(User),
+  UrlUser = "http://inaka.net/" ++ UserNameString,
+  Content = cnf_content_repo:register(UrlUser, IdUser),
+  Url = "/contents/" ++ integer_to_list(cnf_content:id(Content)),
   {ok, Response} = cnf_test_utils:api_call(get, Url, Header),
   #{status_code := 200} = Response,
   Config.
 
 -spec test_handle_delete_ok(config()) ->  config().
 test_handle_delete_ok(Config) ->
-  UserName = "Doge delete_ok",
-  Passsword = "passsword",
-  Email = "email@email.net",
-  User = cnf_user_repo:register(UserName, Passsword, Email),
-  Session = cnf_session_repo:register(cnf_user:id(User)),
-  Token = binary_to_list(cnf_session:token(Session)),
-  Header = #{ <<"Content-Type">> => <<"application/json">>
-            , basic_auth => {UserName, Token}},
-  Content =
-    cnf_content_repo:register("http://inaka.net/delete_ok", cnf_user:id(User)),
+  UserName  = <<"Doge delete_ok">>,
+  Password  = <<"password">>,
+  Email     = <<"email@email.net">>,
+  User      = cnf_user_repo:register(UserName, Password, Email),
+  Session   = cnf_session_repo:register(cnf_user:id(User)),
+  TokenString     = binary_to_list(cnf_session:token(Session)),
+  UserNameString  = binary_to_list(UserName),
+  Header =
+    #{ <<"Content-Type">> => <<"application/json">>
+     , basic_auth => {UserNameString, TokenString}
+     },
+  IdUser = cnf_user:id(User),
+  UrlUser = "http://inaka.net/" ++ UserNameString,
+  Content = cnf_content_repo:register(UrlUser, IdUser),
   Url = "/contents/" ++  integer_to_list(cnf_content:id(Content)),
   {ok, Response} = cnf_test_utils:api_call(delete, Url, Header),
   #{status_code := 204} = Response,

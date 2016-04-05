@@ -27,7 +27,7 @@ register(UserId) ->
   NewSession = cnf_session:new(UserId, NewToken),
   sumo:persist(cnf_session, NewSession).
 
--spec unregister(string()) -> non_neg_integer().
+-spec unregister(binary()) -> non_neg_integer().
 unregister(Token) ->
   sumo:delete_by(cnf_session, [{token, Token}]).
 
@@ -50,7 +50,7 @@ find_by_token(Token) ->
 -spec generate_token() -> binary().
 generate_token() -> erlang:list_to_binary(uuid:uuid_to_string(uuid:get_v4())).
 
--spec is_valid(string(), binary()) -> boolean().
+-spec is_valid(binary(), binary()) -> boolean().
 is_valid(UserName, Token) ->
   try
     Session = find_by_token(Token),
@@ -60,7 +60,6 @@ is_valid(UserName, Token) ->
     {ok, MaxSessionDays} = application:get_env(conferl, max_session_days),
     UpdatedTime = cnf_session:updated_at(Session),
     Now = calendar:universal_time(),
-    Diff = calendar:time_difference(UpdatedTime, Now),
     {DiffDays, _} = calendar:time_difference(UpdatedTime, Now),
     DiffDays < MaxSessionDays
   catch

@@ -28,32 +28,28 @@
 
 
 -spec write(cnf_messages:message()) -> cnf_messages:message().
-write(Message) -> sumo:persist(cnf_message, Message).
+write(Message) ->
+  sumo:persist(cnf_message, Message).
 
--spec write_top(integer()
-                , string()
-                , integer()) ->
-  cnf_messages:message().
+-spec write_top(
+  integer(), binary(), integer()
+) -> cnf_messages:message().
 write_top(ContentId, MessageText, User) ->
   TopLevelResponseId = undefined,
   Message =
-    cnf_message:new(ContentId
-                   , TopLevelResponseId
-                   , MessageText
-                   , User),
+    cnf_message:new(
+      ContentId, TopLevelResponseId, MessageText, User
+    ),
   sumo:persist(cnf_message, Message).
 
--spec write_reply(integer()
-                  , integer()
-                  , string()
-                  , integer()) ->
-  cnf_messages:message().
+-spec write_reply(
+  integer(), integer(), binary(), integer()
+) -> cnf_messages:message().
 write_reply(ContentId, ResponseId, MessageText, User) ->
   Message =
-    cnf_message:new(ContentId
-                   , ResponseId
-                   , MessageText
-                   , User),
+    cnf_message:new(
+      ContentId, ResponseId, MessageText, User
+    ),
   sumo:persist(cnf_message, Message).
 
 -spec delete(pos_integer()) -> boolean().
@@ -75,12 +71,13 @@ list_replies(MessageResponseId) ->
 
 -spec list_top_level(pos_integer()) -> [cnf_messages:message()].
 list_top_level(ContentId) ->
-  sumo:find_by(cnf_message, [ {content_id,  ContentId}
-                            , {response_id, null}
-                            ]).
+  sumo:find_by(
+    cnf_message, [{content_id,  ContentId}, {response_id, null}]
+  ).
 
 -spec list_by_user(pos_integer()) -> [cnf_messages:message()].
-list_by_user(UserId) -> sumo:find_by(cnf_message, [{user, UserId}]).
+list_by_user(UserId) ->
+  sumo:find_by(cnf_message, [{user, UserId}]).
 
 -spec delete_all() -> integer().
   delete_all() -> sumo:delete_all(cnf_message).

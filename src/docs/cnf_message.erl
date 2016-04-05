@@ -19,7 +19,7 @@
   #{ id           => integer()
    , content_id   => integer()
    , response_id  => integer()
-   , message_text => string()
+   , message_text => binary()
    , user_id      => integer()
    , created_at   => tuple()
    , updated_at   => tuple()
@@ -83,17 +83,17 @@ sumo_schema() ->
 %%
 %% @doc functions definitions for message
 
--spec new( integer(), integer() | undefined, string(), integer()) -> message().
+-spec new(integer(), integer() | undefined, binary(), integer()) -> message().
 new(ContentId, ResponseId, MessageText, User) ->
   Now = calendar:universal_time(),
   #{  id           => undefined
-    , content_id   => ContentId
-    , response_id  => ResponseId
-    , message_text => MessageText
-    , user_id      => User
-    , created_at   => Now
-    , updated_at   => Now
-    }.
+   , content_id   => ContentId
+   , response_id  => ResponseId
+   , message_text => MessageText
+   , user_id      => User
+   , created_at   => Now
+   , updated_at   => Now
+   }.
 
 %% Getters/Setters %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -109,19 +109,19 @@ content_id(Message) ->
 response_id(Message) ->
   maps:get(response_id, Message).
 
--spec message_text(message()) -> string().
+-spec message_text(message()) -> binary().
 message_text(Message) ->
   maps:get(message_text, Message).
 
--spec message_text(message(), string()) -> message().
+-spec message_text(message(), binary()) -> message().
 message_text(Message, MessageText) ->
  Message#{ message_text => MessageText}.
 
--spec user_id(message()) -> string().
+-spec user_id(message()) -> binary().
 user_id(Message) ->
   maps:get(user_id, Message).
 
--spec user_id(message(), string()) -> message().
+-spec user_id(message(), binary()) -> message().
 user_id(Message, MessageText) ->
  Message#{user_id => MessageText}.
 

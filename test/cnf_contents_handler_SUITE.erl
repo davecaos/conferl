@@ -49,8 +49,8 @@ all() ->
 
 -spec init_per_suite(config()) -> config().
 init_per_suite(Config) ->
-  application:ensure_all_started(conferl),
-  application:ensure_all_started(shotgun),
+  {ok, _} = application:ensure_all_started(conferl),
+  {ok, _} = application:ensure_all_started(shotgun),
   sumo:create_schema(),
   Config.
 
@@ -72,11 +72,15 @@ end_per_testcase(_Function, Config) ->
 
 -spec test_handle_post_ok(config()) -> config().
 test_handle_post_ok(Config) ->
-  User = cnf_user_repo:register("post_ok", "password", "mail@email.net"),
-  Session = cnf_session_repo:register(cnf_user:id(User)),
+  User =
+    cnf_user_repo:register(<<"post_ok">>, <<"pass">>, <<"mail@email.net">>),
+  Id = cnf_user:id(User),
+  Session = cnf_session_repo:register(Id),
   Token = binary_to_list(cnf_session:token(Session)),
-  Header = #{ <<"Content-Type">> => <<"application/json">>
-            , basic_auth => {"post_ok", Token}},
+  Header =
+   #{ <<"Content-Type">> => <<"application/json">>
+    , basic_auth => {"post_ok", Token}
+    },
   Body = #{ url => <<"http://inaka.net/post_ok">>},
   JsonBody = jiffy:encode(Body),
   {ok, Response} =
@@ -84,19 +88,27 @@ test_handle_post_ok(Config) ->
   #{status_code := 204} = Response,
   #{headers := ResponseHeaders} = Response,
   Location = proplists:get_value(<<"location">>, ResponseHeaders),
-  <<"http://localhost/contents/", _Id/binary>> = Location,
+  Url = cnf_test_utils:get_server_url(),
+  UrlSize =  byte_size(Url),
+  EndpointUrl = <<Url:UrlSize/binary, "/contents/">>,
+  Size = byte_size(EndpointUrl),
+  <<EndpointUrl:Size/binary, _Id/binary>> = Location,
   Config.
 
 -spec test_handle_post_duplicated(config()) -> config().
 test_handle_post_duplicated(Config) ->
-  User = cnf_user_repo:register("post_dupl", "password", "mail@email.net"),
+  User =
+    cnf_user_repo:register(<<"post_dupl">>, <<"pass">>, <<"mail@email.net">>),
   Session = cnf_session_repo:register(cnf_user:id(User)),
   Token = binary_to_list(cnf_session:token(Session)),
-  Header = #{<<"Content-Type">> => <<"application/json">>
-            , basic_auth => {"post_dupl", Token}},
+  Header =
+   #{ <<"Content-Type">> => <<"application/json">>
+    , basic_auth => {"post_dupl", Token}
+    },
   Body = #{ url => <<"http://inaka.net/post_dup">>},
   JsonBody = jiffy:encode(Body),
-  cnf_content_repo:register("http://inaka.net/post_dup", cnf_user:id(User)),
+  Id = cnf_user:id(User),
+  _ = cnf_content_repo:register("http://inaka.net/post_dup", Id),
   {ok, Response} =
     cnf_test_utils:api_call(post, "/contents", Header,  JsonBody),
   #{status_code := 400} = Response,
@@ -104,33 +116,42 @@ test_handle_post_duplicated(Config) ->
 
 -spec test_get_qs_ok(config()) -> config().
 test_get_qs_ok(Config) ->
-  User = cnf_user_repo:register("get_qs_ok", "password", "mail@email.net"),
-  Session = cnf_session_repo:register(cnf_user:id(User)),
-  Token = binary_to_list(cnf_session:token(Session)),
-  Header = #{<<"Content-Type">> => <<"text/plain; charset=utf-8">>
-            , basic_auth => {"get_qs_ok", Token}},
-  cnf_content_repo:register("http://inaka.net/get_qs_ok", 1),
-  cnf_content_repo:register("https://twitter.com/get_qs_ok", 1),
-  DomainInaka = "inaka.net",
-  DomainTwitter = "twitter.com",
-  UrlInaka = "/contents/?domain=" ++  DomainInaka,
+  UserName = <<"get_qs_ok">>,
+  Password = <<"password">>,
+  Email    = <<"mail@email.net">>,
+  UserEntity = cnf_user_repo:register(UserName, Password, Email),
+  Session = cnf_session_repo:register(cnf_user:id(UserEntity)),
+  Token   = binary_to_list(cnf_session:token(Session)),
+  Header =
+   #{ <<"Content-Type">> => <<"text/plain; charset=utf-8">>
+    , basic_auth => {"get_qs_ok", Token}
+    },
+  UrlPostInaka   = "http://inaka.net/get_qs_ok",
+  UrlPostTwitter = "https://twitter.com/get_qs_ok",
+  ContentInaka   = cnf_content_repo:register(UrlPostInaka, 1),
+  ContentTwitter = cnf_content_repo:register(UrlPostTwitter, 1),
+  DomainInaka    = "inaka.net" = cnf_content:domain(ContentInaka),
+  DomainTwitter  = "twitter.com" = cnf_content:domain(ContentTwitter),
+  UrlInaka = "/contents/?domain=" ++ DomainInaka,
   {ok, ResponseInaka} = cnf_test_utils:api_call(get, UrlInaka, Header),
   #{status_code := 200} = ResponseInaka,
   #{body := JsonBodyRespInaka} = ResponseInaka,
   BodyRespInaka = jiffy:decode(JsonBodyRespInaka, [return_maps]),
-  UrlTwitter = "/contents/?domain=" ++  DomainTwitter,
-  F1 = fun(DomainMap) ->
-         #{<<"domain">> := Domain} = DomainMap,
-         Domain = <<"inaka.net">>
-       end,
-  ok = lists:foreach(F1, BodyRespInaka),
+  UrlTwitter = "/contents/?domain=" ++ DomainTwitter,
+  FunCheckInaka =
+   fun(DomainMap) ->
+      #{<<"domain">> := Domain} = DomainMap,
+      Domain = DomainInaka
+   end,
+  ok = lists:foreach(FunCheckInaka, BodyRespInaka),
   {ok, ResponseTwitter} = cnf_test_utils:api_call(get, UrlTwitter, Header),
   #{body := JsonBodyRespTwitter} = ResponseTwitter,
   BodyRespTwitter = jiffy:decode(JsonBodyRespTwitter, [return_maps]),
-  F2 = fun(DomainMap) ->
-         #{<<"domain">> := Domain} = DomainMap,
-         Domain = <<"twitter.com">>
-       end,
-  ok = lists:foreach(F2, BodyRespTwitter),
+  FunCheckTwitter =
+   fun(DomainMap) ->
+     Domain = maps:get(<<"domain">>, DomainMap),
+     Domain = DomainTwitter
+   end,
+  ok = lists:foreach(FunCheckTwitter, BodyRespTwitter),
   #{status_code := 200} = ResponseTwitter,
   Config.

@@ -54,9 +54,8 @@ all() ->
 
 -spec init_per_suite(config()) -> config().
 init_per_suite(_Config) ->
-  application:ensure_all_started(sumo_db),
+  {ok, _} = application:ensure_all_started(sumo_db),
   sumo:create_schema(),
-  lager:start(),
   [].
 
 -spec end_per_suite(config()) -> config().
@@ -90,9 +89,7 @@ fetch_user(_Config) ->
   Email = <<"email">>,
   RegistedUser = cnf_user_repo:register(UserName, Passsword, Email),
   Id = cnf_user:id(RegistedUser),
-  lager:debug("Id:  ~p", [Id]),
   PersistedUser = cnf_user_repo:find(Id),
-  lager:debug("PersistedUser:  ~p", [PersistedUser]),
   UserName = cnf_user:user_name(PersistedUser),
   Passsword = cnf_user:password(PersistedUser),
   Email = cnf_user:email(PersistedUser),
@@ -103,7 +100,7 @@ duplicated_user(_Config) ->
   UserName = <<"Doge duplicate_user">>,
   Passsword = <<"passsword">>,
   Email = <<"email">>,
-  cnf_user_repo:register(UserName, Passsword, Email),
+  _User = cnf_user_repo:register(UserName, Passsword, Email),
   try cnf_user_repo:register(UserName, Passsword, Email) of
     _ -> ct:fail("Unexpected result (!)")
   catch
@@ -117,24 +114,26 @@ unregistrate_user(_Config) ->
   Email = <<"email">>,
   RegistedUser = cnf_user_repo:register(UserName, Passsword, Email),
   cnf_user_repo:unregister(UserName),
-  try cnf_user_repo:find_by_name(cnf_user:id(RegistedUser)) of
+  try cnf_user_repo:find_by_name(UserName) of
     _ -> ct:fail("Unexpected result (!)")
   catch
     throw:notfound -> ok
-  end.
+  end,
+  ok.
 
 -spec fetch_user_bad(config()) -> ok.
 fetch_user_bad(_Config) ->
-  NotFoundId = 0,
+  NotFoundId = <<"0xFFFF">>,
   try cnf_user_repo:find_by_name(NotFoundId) of
     _ -> ct:fail("Unexpected result (!)")
   catch
     throw:notfound -> ok
-  end.
+  end,
+  ok.
 
 -spec unregistrate_user_bad(config()) -> ok.
 unregistrate_user_bad(_Config) ->
-  Name = <<"Doge unregistrate_user_bad">>,
+  Name = <<"0xFFFF">>,
   try cnf_user_repo:unregister(Name) of
     _ -> ct:fail("Unexpected result (!)")
   catch

@@ -18,8 +18,7 @@
 -include_lib("mixer/include/mixer.hrl").
 -mixin([
         {cnf_default_handler,
-         [ init/3
-         , rest_init/2
+         [ init/2
          , rest_terminate/2
          , content_types_accepted/2
          , content_types_provided/2
@@ -33,18 +32,19 @@
 
 allowed_methods(Req, State) ->
   {[ <<"POST">>
-   , <<"OPTIONS">>]
+   , <<"OPTIONS">>
+   ]
   , Req
   , State}.
-
 
 -spec handle_post(cowboy_req:req(), state()) ->
   {true, cowboy_req:req(), state()}.
 handle_post(Req, State) ->
   {ok, JsonRequestBody, Req1} = cowboy_req:body(Req),
-  #{<<"user_name">> := UserName
-   , <<"email">> := Email
-   , <<"password">> := Password} = jiffy:decode(JsonRequestBody, [return_maps]),
+  #{ <<"user_name">> := UserName
+   , <<"email">>     := Email
+   , <<"password">>  := Password
+   } = jiffy:decode(JsonRequestBody, [return_maps]),
   try
     RegistedUser = cnf_user_repo:register(UserName, Password, Email) ,
     JsonResponseBody = cnf_user:to_json(RegistedUser),
