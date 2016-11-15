@@ -69,17 +69,8 @@ handle_post(Req, State) ->
       cnf_utils:handle_exception(Exception, Req, State)
   end.
 
--spec handle_get(cowboy_req:req(), state()) ->
-  {list(), cowboy_req:req(), state()}.
-handle_get(Req, State) ->
-  OptionQueryL =
-    [ <<"all_msg_content">>
-    , <<"all_rply_content">>
-    , <<"top_msg_content">>
-    , <<"all_msg_user">>
-    ],
-  CustomQuerysFun =
-  fun(Option, {ReqFold, WhereList}) ->
+
+custom_query(Option, {ReqFold, WhereList}) ->
     {QueryStringVal, NewReq} =
       cowboy_req:qs_val(Option, ReqFold, <<"undefined">>),
     case {Option, QueryStringVal} of
@@ -100,14 +91,9 @@ handle_get(Req, State) ->
         { NewReq, WhereList ++ [{user_id, UserId}]};
        _WhenOthers ->
         { NewReq, WhereList}
-    end
-  end,
-  OptionOrderL =
-    [ <<"sort_created_at">>
-    , <<"sort_by_score">>
-    ],
-  CustomOrderFun =
-  fun(Option, {ReqFold, OrderList}) ->
+    end.
+
+custom_order(Option, {ReqFold, OrderList}) ->
     {QueryStringVal, NewReq} =
       cowboy_req:qs_val(Option, ReqFold, <<"undefined">>),
     case {Option, QueryStringVal} of
@@ -119,10 +105,23 @@ handle_get(Req, State) ->
         { NewReq, OrderList ++ {score, desc}};
        _WhenOthers ->
         { NewReq, OrderList}
-    end
-  end,
-  {Req2, OrderString} = lists:foldr(CustomOrderFun, {Req, []}, OptionOrderL),
-  {Req3, QueryString} = lists:foldr(CustomQuerysFun, {Req2, []}, OptionQueryL),
+    end.
+
+-spec handle_get(cowboy_req:req(), state()) ->
+  {list(), cowboy_req:req(), state()}.
+handle_get(Req, State) ->
+  OptionQueryL =
+    [ <<"all_msg_content">>
+    , <<"all_rply_content">>
+    , <<"top_msg_content">>
+    , <<"all_msg_user">>
+    ],
+  OptionOrderL =
+    [ <<"sort_created_at">>
+    , <<"sort_by_score">>
+    ],
+  {Req2, OrderString} = lists:foldl(fun custom_order/2, {Req, []}, OptionOrderL),
+  {Req3, QueryString} = lists:foldl(fun custom_query/2, {Req2, []}, OptionQueryL),
   RequestContent = cnf_message_repo:custom_query(QueryString, OrderString),
   Fun1 =
     fun (Message) ->
