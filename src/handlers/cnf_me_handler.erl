@@ -19,8 +19,7 @@
 -include_lib("mixer/include/mixer.hrl").
 -mixin([
         {cnf_default_handler,
-         [ init/3
-         , rest_init/2
+         [ init/2
          , rest_terminate/2
          , content_types_accepted/2
          , content_types_provided/2
@@ -35,10 +34,7 @@
 -type state() :: #{}.
 
 allowed_methods(Req, State) ->
-  {[ <<"DELETE">>
-   , <<"OPTIONS">>]
-  , Req
-  , State}.
+  {[ <<"DELETE">>, <<"OPTIONS">>], Req, State}.
 
 -spec is_authorized(cowboy_req:req(), state()) ->
   {boolean() | {boolean(), binary()}, cowboy_req:req(), state()}.
@@ -49,5 +45,5 @@ is_authorized(Req, State) ->
   {boolean(), cowboy_req:req(), state()}.
 delete_resource(Req, State) ->
   #{user_name := VerifyiedUserName} = State,
-  cnf_user_repo:unregister(binary_to_list(VerifyiedUserName)),
+  cnf_user_repo:unregister(VerifyiedUserName),
   {true, Req, State}.

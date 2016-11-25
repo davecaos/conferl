@@ -19,8 +19,7 @@
 -include_lib("mixer/include/mixer.hrl").
 -mixin([
         {cnf_default_handler,
-         [ init/3
-         , rest_init/2
+         [ init/2
          , rest_terminate/2
          , content_types_accepted/2
          , content_types_provided/2
@@ -32,7 +31,7 @@
 -export([handle_post/2]).
 -export([allowed_methods/2]).
 -export([is_authorized/2]).
-
+-compile(export_all).
 -type state() :: #{}.
 
 allowed_methods(Req, State) ->
@@ -69,65 +68,71 @@ handle_post(Req, State) ->
       cnf_utils:handle_exception(Exception, Req, State)
   end.
 
+all_msg_content(Value) ->
+  BuilderFun =
+    fun(ContentId) ->[{content_id, ContentId}] end,
+  binary_number(Value, BuilderFun).
 
-custom_query(Option, {ReqFold, WhereList}) ->
-    {QueryStringVal, NewReq} =
-      cowboy_req:qs_val(Option, ReqFold, <<"undefined">>),
-    case {Option, QueryStringVal} of
-      { _Option , <<"undefined">>} ->
-        { NewReq, WhereList};
-      {<<"all_msg_content">>, Value}   ->
-        ContentId = list_to_integer(binary_to_list(Value)),
-        { NewReq, WhereList ++ {content_id, ContentId}};
-      {<<"top_msg_content">>, Value} ->
-        ContentId = list_to_integer(binary_to_list(Value)),
-        { NewReq, WhereList ++ [{content_id, ContentId}, {response_id, null}]};
-      {<<"all_rply_content">>, Value}  ->
-         ContentId = list_to_integer(binary_to_list(Value)),
-        { NewReq
-        , WhereList ++ [{content_id, ContentId}, {response_id, not_null}]};
-      {<<"all_msg_user">>, Value} ->
-        UserId = list_to_integer(binary_to_list(Value)),
-        { NewReq, WhereList ++ [{user_id, UserId}]};
-       _WhenOthers ->
-        { NewReq, WhereList}
-    end.
+top_msg_content(Value) ->
+  BuilderFun =
+    fun(ContentId) -> [{content_id, ContentId}, {response_id, null}] end,
+  binary_number(Value, BuilderFun).
 
-custom_order(Option, {ReqFold, OrderList}) ->
-    {QueryStringVal, NewReq} =
-      cowboy_req:qs_val(Option, ReqFold, <<"undefined">>),
-    case {Option, QueryStringVal} of
-      { _Option , <<"undefined">>} ->
-        { NewReq, OrderList};
-      {<<"sort_created_at">> , <<"true">>} ->
-        {NewReq, OrderList ++ {created_at, desc}};
-      {<<"sort_by_score">> , <<"true">>} ->
-        { NewReq, OrderList ++ {score, desc}};
-       _WhenOthers ->
-        { NewReq, OrderList}
-    end.
+all_rply_content(Value) ->
+  BuilderFun =
+    fun(ContentId) -> [{content_id, ContentId}, {response_id, not_null}] end,
+  binary_number(Value, BuilderFun).
+
+all_msg_user(Value) ->
+  BuilderFun = fun(UserId) -> [{user_id, UserId}] end,
+  binary_number(Value, BuilderFun).
+
+sort_created_at(<<"true">>) ->
+  {true, [{created_at, desc}]};
+sort_created_at(_) ->
+  false.
+
+sort_by_score(<<"true">>) ->
+  {true, [{score, desc}]};
+sort_by_score(_)->
+  false.
+
+binary_number(Binary, BuilderFun) ->
+  try binary_to_integer(Binary) of
+    Value -> {true, BuilderFun(Value)}
+  catch
+    _Error:_Exp -> []
+  end.
 
 -spec handle_get(cowboy_req:req(), state()) ->
   {list(), cowboy_req:req(), state()}.
 handle_get(Req, State) ->
-  OptionQueryL =
-    [ <<"all_msg_content">>
-    , <<"all_rply_content">>
-    , <<"top_msg_content">>
-    , <<"all_msg_user">>
-    ],
-  OptionOrderL =
-    [ <<"sort_created_at">>
-    , <<"sort_by_score">>
-    ],
-  {Req2, OrderString} = lists:foldl(fun custom_order/2, {Req, []}, OptionOrderL),
-  {Req3, QueryString} = lists:foldl(fun custom_query/2, {Req2, []}, OptionQueryL),
+  #{ all_msg_content := AllMsgContest
+   , all_rply_content := AllRplyContent
+   , top_msg_content := TopMsgContent
+   , all_msg_user := AllMsgUser
+   , sort_created_at := SortCreatedAt
+   , sort_by_score := SortByScore
+   } = cowboy_req:match_qs([ {all_msg_content, fun all_msg_content/1 , []}
+                           , {all_rply_content, fun all_rply_content/1, []}
+                           , {top_msg_content, fun top_msg_content/1, []}
+                           , {all_msg_user, fun all_msg_user/1, []}
+                           , {sort_created_at, fun sort_created_at/1, []}
+                           , {sort_by_score, fun sort_by_score/1, []}
+                           ], Req),
+  QueryString =
+    AllMsgContest ++
+    AllMsgUser ++
+    AllRplyContent ++
+    TopMsgContent ++
+    AllMsgUser,
+  OrderString = SortCreatedAt ++ SortByScore,
   RequestContent = cnf_message_repo:custom_query(QueryString, OrderString),
   Fun1 =
     fun (Message) ->
       ListVotes = cnf_vote_repo:list_votes(cnf_message:id(Message)),
-      Message#{ votes => ListVotes}
+      Message#{votes => ListVotes}
     end,
   RequestContent2 = lists:map(Fun1, RequestContent),
   Body = cnf_content:to_json(RequestContent2),
-  {Body, Req3, State}.
+  {Body, Req, State}.

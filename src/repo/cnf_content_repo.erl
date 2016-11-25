@@ -62,11 +62,11 @@ unregister(Id) ->
 
 -spec fetch(integer()) -> notfound | cnf_content:content().
 fetch(ContentId) ->
-  case sumo:find(cnf_content,ContentId) of
+  case sumo:find(cnf_content, ContentId) of
     notfound  -> throw(notfound);
     Content   -> Content
   end.
 
--spec list(string()) -> [cnf_content:content()].
+-spec list(binary()) -> [cnf_content:content()].
 list(Domain) ->
   sumo:find_by(cnf_content, [{domain, Domain}]).

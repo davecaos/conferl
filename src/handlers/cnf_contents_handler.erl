@@ -19,8 +19,7 @@
 -include_lib("mixer/include/mixer.hrl").
 -mixin([
         {cnf_default_handler,
-         [ init/3
-         , rest_init/2
+         [ init/2
          , rest_terminate/2
          , content_types_accepted/2
          , content_types_provided/2
@@ -58,10 +57,10 @@ handle_post(Req, State) ->
     UserId = cnf_session:user_id(cnf_session_repo:find_by_token(Token)),
     Content = cnf_content_repo:register(binary_to_list(Url), UserId),
     Id = cnf_content:id(Content),
-    {Host, Req2} = cowboy_req:url(Req1),
+    Host = cowboy_req:url(Req1),
     Location = [Host, <<"/">>, list_to_binary(integer_to_list(Id))],
-    Req3 = cowboy_req:set_resp_header(<<"Location">>, Location, Req2),
-    {true, Req3, State}
+    Req2 = cowboy_req:set_resp_header(<<"Location">>, Location, Req1),
+    {true, Req2, State}
   catch
     _Type:Exception ->
       cnf_utils:handle_exception(Exception, Req, State)
@@ -70,8 +69,8 @@ handle_post(Req, State) ->
 -spec handle_get(cowboy_req:req(), state()) ->
   {list(), cowboy_req:req(), state()}.
 handle_get(Req, State) ->
-  {QueryStringVal, Req2} = cowboy_req:qs_val(<<"domain">>, Req),
+  #{domain := QueryStringVal} = cowboy_req:match_qs([domain], Req),
   RequestContent =
     cnf_content_repo:find_by_domain(binary_to_list(QueryStringVal)),
   Body = cnf_content:to_json(RequestContent),
-  {Body, Req2, State}.
+  {Body, Req, State}.

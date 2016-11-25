@@ -51,8 +51,8 @@ all() ->
 
 -spec init_per_suite(config()) -> config().
 init_per_suite(Config) ->
-  application:ensure_all_started(sumo_db),
-  application:ensure_all_started(shotgun),
+  {ok, _} = application:ensure_all_started(sumo_db),
+  {ok, _} = application:ensure_all_started(shotgun),
   sumo:create_schema(),
   lager:start(),
   Config.
@@ -72,19 +72,21 @@ end_per_testcase(_Function, Config) ->
 
 -spec delete_user(config()) -> config().
 delete_user(Config) ->
-  Name = "Doge delete_user",
-  Passsword = "Such Password, Many security",
-  Email = "email@email.net",
+  Name      = <<"Doge delete_user">>,
+  Passsword = <<"Such Password, Many security">>,
+  Email     = <<"email@email.net">>,
   RegistedUser = cnf_user_repo:register(Name, Passsword, Email),
   Session = cnf_session_repo:register(cnf_user:id(RegistedUser)),
-  Token = binary_to_list(cnf_session:token(Session)),
-  Header = #{ <<"Content-Type">> => <<"application/json">>
-            , basic_auth => {Name, Token}},
+  TokenString = binary_to_list(cnf_session:token(Session)),
+  NameString  = binary_to_list(Name),
+  Header =
+   #{ <<"Content-Type">> => <<"application/json">>
+    , basic_auth => {NameString, TokenString}
+    },
   Body = #{},
   JsonBody = jiffy:encode(Body),
-  Respuesta =
-    cnf_test_utils:api_call(delete, "/me", Header, JsonBody),
-    {ok, Response} = Respuesta,
+  Result = cnf_test_utils:api_call(delete, "/me", Header, JsonBody),
+  {ok, Response} = Result,
   #{status_code := 204} = Response,
   notfound = cnf_user_repo:find(cnf_user:id(RegistedUser)),
   Config.
@@ -92,21 +94,20 @@ delete_user(Config) ->
 
 -spec delete_user_attack(config()) -> config().
 delete_user_attack(Config) ->
-  Name = "Doge delete_user",
-  Passsword = "Such Password, Many security",
-  UserNameAttacker = "Doge Such Hacker",
-  PassswordHacker = "Such Swordfish, Many cracker",
-  Email = "email@email.net",
+  Name             = <<"Doge delete_user">>,
+  Passsword        = <<"Such Password, Many security">>,
+  UserAttacker     = <<"Such Hacker">>,
+  PassHacker       = <<"Such Swordfish, Many cracker">>,
+  Email            = <<"email@email.net">>,
   RegistedUser = cnf_user_repo:register(Name, Passsword, Email),
   Session = cnf_session_repo:register(cnf_user:id(RegistedUser)),
-  Token = binary_to_list(cnf_session:token(Session)),
-  RegistedUserhacker =
-    cnf_user_repo:register(UserNameAttacker, PassswordHacker, Email),
-  SessionHacker = cnf_session_repo:register(cnf_user:id(RegistedUserhacker)),
-  TokenHacker = binary_to_list(cnf_session:token(SessionHacker)),
-
-  Header = #{ <<"Content-Type">> => <<"application/json">>
-            , basic_auth => {UserNameAttacker, Token}},
+  TokenString = binary_to_list(cnf_session:token(Session)),
+  RegistedUserhacker = cnf_user_repo:register(UserAttacker, PassHacker, Email),
+  UserAttackerString = binary_to_list(UserAttacker),
+  Header =
+   #{ <<"Content-Type">> => <<"application/json">>
+    , basic_auth => {UserAttackerString, TokenString}
+    },
   Body = #{},
   JsonBody = jiffy:encode(Body),
   Respuesta =
@@ -117,14 +118,17 @@ delete_user_attack(Config) ->
 
 -spec get_user(config()) -> config().
 get_user(Config) ->
-  UserName = "Doge get_user",
-  Passsword = "Such Password, Many security",
-  Email = "email@email.net",
+  UserName  = <<"Doge get_user">>,
+  Passsword = <<"Such Password, Many security">>,
+  Email     = <<"email@email.net">>,
   RegistedUser = cnf_user_repo:register(UserName, Passsword, Email),
   Session = cnf_session_repo:register(cnf_user:id(RegistedUser)),
-  Token = binary_to_list(cnf_session:token(Session)),
-  Header = #{ <<"Content-Type">> => <<"application/json">>
-            , basic_auth => {UserName, Token}},
+  TokenString = binary_to_list(cnf_session:token(Session)),
+  UserNameString = binary_to_list(UserName),
+  Header =
+   #{ <<"Content-Type">> => <<"application/json">>
+    , basic_auth => {UserNameString, TokenString}
+    },
   Url = "/users/" ++  integer_to_list(cnf_user:id(RegistedUser)),
   {ok, Response} = cnf_test_utils:api_call(get, Url, Header),
   #{status_code := 200} = Response,

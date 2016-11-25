@@ -19,7 +19,7 @@
   #{ id           => integer()
    , content_id   => integer()
    , response_id  => integer()
-   , message_text => string()
+   , message_text => binary()
    , user_id      => integer()
    , created_at   => tuple()
    , updated_at   => tuple()
