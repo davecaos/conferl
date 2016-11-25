@@ -45,6 +45,8 @@
 -export([is_top_message/1]).
 -export([updated_at/1]).
 -export([updated_at/2]).
+-export([score/1]).
+-export([score/2]).
 -export([to_json/1]).
 
 -behavior(sumo_doc).
@@ -73,6 +75,7 @@ sumo_schema() ->
     sumo:new_field(response_id , integer,  []),
     sumo:new_field(message_text, string ,  [{length, 1024}, not_null]),
     sumo:new_field(user_id     , integer,  [not_null]),
+    sumo:new_field(score       , integer,  [not_null]),
     sumo:new_field(created_at  , datetime, [not_null]),
     sumo:new_field(updated_at  , datetime, [not_null])
   ]).
@@ -83,17 +86,18 @@ sumo_schema() ->
 %%
 %% @doc functions definitions for message
 
--spec new(integer(), integer() | undefined, binary(), integer()) -> message().
+-spec new( integer(), integer() | undefined, string(), integer()) -> message().
 new(ContentId, ResponseId, MessageText, User) ->
   Now = calendar:universal_time(),
   #{  id           => undefined
-   , content_id   => ContentId
-   , response_id  => ResponseId
-   , message_text => MessageText
-   , user_id      => User
-   , created_at   => Now
-   , updated_at   => Now
-   }.
+    , content_id   => ContentId
+    , response_id  => ResponseId
+    , message_text => MessageText
+    , user_id      => User
+    , score        => 0
+    , created_at   => Now
+    , updated_at   => Now
+    }.
 
 %% Getters/Setters %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -109,19 +113,19 @@ content_id(Message) ->
 response_id(Message) ->
   maps:get(response_id, Message).
 
--spec message_text(message()) -> binary().
+-spec message_text(message()) -> string().
 message_text(Message) ->
   maps:get(message_text, Message).
 
--spec message_text(message(), binary()) -> message().
+-spec message_text(message(), string()) -> message().
 message_text(Message, MessageText) ->
  Message#{ message_text => MessageText}.
 
--spec user_id(message()) -> binary().
+-spec user_id(message()) -> string().
 user_id(Message) ->
   maps:get(user_id, Message).
 
--spec user_id(message(), binary()) -> message().
+-spec user_id(message(), string()) -> message().
 user_id(Message, MessageText) ->
  Message#{user_id => MessageText}.
 
@@ -140,6 +144,14 @@ updated_at(Message) ->
 -spec updated_at(message(), tuple()) -> message().
 updated_at(Message, UpdatedAt) ->
   Message#{updated_at => UpdatedAt}.
+
+-spec score(message()) -> integer().
+score(Message) ->
+  maps:get(score, Message).
+
+-spec score(message(), integer()) -> message().
+score(Message, Score) ->
+  Message#{score => Score}.
 
 -spec is_top_message(message()) -> boolean().
 is_top_message(Message) ->
