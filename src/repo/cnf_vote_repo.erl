@@ -13,7 +13,7 @@
 % under the License.
 -module(cnf_vote_repo).
 
--author('David Cao <david.cao@inakanetworks.com>').
+-author('David Cao <david.c.h.cao@gmail.com>').
 -export([upvote/2]).
 -export([downvote/2]).
 -export([remove_vote/1]).

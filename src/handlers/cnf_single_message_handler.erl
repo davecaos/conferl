@@ -16,6 +16,8 @@
 
 -author('David Cao <david.c.h.cao@gmail.com>').
 
+-behaviour(trails_handler).
+
 -include_lib("mixer/include/mixer.hrl").
 -mixin([
         {cnf_default_handler,
@@ -31,8 +33,28 @@
 -export([handle_get/2]).
 -export([delete_resource/2]).
 -export([is_authorized/2]).
+-export([trails/0]).
 
 -type state() :: #{}.
+
+%% trails_handler callback
+-spec trails() -> trails:trails().
+trails() ->
+  Metadata =
+    #{ get =>
+       #{ tags => ["messages"]
+        , description => "Get a messages"
+        , produces => ["application/json"]
+        }
+     , delete =>
+       #{ tags => ["messages"]
+        , description => "Delete a message"
+        , produces => ["application/json"]
+        }
+     },
+  Path = "/messages/:messages_id",
+  Options = #{module => ?MODULE, init_args => #{path => Path}},
+  [trails:trail(Path, ?MODULE, Options, Metadata)].
 
 allowed_methods(Req, State) ->
   {[ <<"GET">>

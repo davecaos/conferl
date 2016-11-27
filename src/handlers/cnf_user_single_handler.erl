@@ -14,7 +14,7 @@
 
 -module(cnf_user_single_handler).
 
--author('David Cao <david.cao@inakanetworks.com>').
+-author('David Cao <david.c.h.cao@gmail.com>').
 
 -include_lib("mixer/include/mixer.hrl").
 
@@ -31,12 +31,26 @@
 -export([handle_get/2]).
 -export([allowed_methods/2]).
 -export([is_authorized/2]).
+-export([trails/0]).
 
 -type state() :: #{}.
 
+%% trails_handler callback
+-spec trails() -> trails:trails().
+trails() ->
+  Metadata =
+    #{ get =>
+       #{ tags => ["users"]
+        , description => "Get an user info acount"
+        , produces => ["application/json"]
+        }
+     },
+  Path = "/users/:user_id",
+  Options = #{module => ?MODULE, init_args => #{path => Path}},
+  [trails:trail(Path, ?MODULE, Options, Metadata)].
+
 allowed_methods(Req, State) ->
-  {[ <<"GET">>
-   , <<"OPTIONS">>]
+  {[<<"GET">>, <<"OPTIONS">>]
   , Req
   , State}.
 

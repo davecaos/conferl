@@ -27,15 +27,35 @@
 
 -export([handle_post/2]).
 -export([allowed_methods/2]).
+-export([trails/0]).
 
 -type state() :: #{}.
 
+%% trails_handler callback
+-spec trails() -> trails:trails().
+trails() ->
+  Metadata =
+    #{ get =>
+       #{ tags => ["users"]
+        , description => "Get users"
+        , produces => ["application/json"]
+        }
+     , post =>
+       #{ tags => ["users"]
+        , description => "Post a new user"
+        , consumes => ["application/json"]
+        , produces => ["application/json"]
+        }
+     },
+  Path = "/users/",
+  Options = #{module => ?MODULE, init_args => #{path => Path}},
+  [trails:trail(Path, ?MODULE, Options, Metadata)].
+
 allowed_methods(Req, State) ->
-  {[ <<"POST">>
-   , <<"OPTIONS">>
-   ]
+  {[ <<"POST">>, <<"OPTIONS">>]
   , Req
-  , State}.
+  , State
+  }.
 
 -spec handle_post(cowboy_req:req(), state()) ->
   {true, cowboy_req:req(), state()}.

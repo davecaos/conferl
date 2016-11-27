@@ -14,7 +14,7 @@
 
 -module(cnf_sessions_handler).
 
--author('David Cao <david.cao@inakanetworks.com>').
+-author('David Cao <david.c.h.cao@gmail.com>').
 
 -include_lib("mixer/include/mixer.hrl").
 -mixin([
@@ -30,8 +30,25 @@
 -export([handle_post/2]).
 -export([allowed_methods/2]).
 -export([is_authorized/2]).
+-export([trails/0]).
 
 -type state() :: #{}.
+
+%% trails_handler callback
+-spec trails() -> trails:trails().
+trails() ->
+  Metadata =
+    #{ post =>
+       #{ tags => ["sessions"]
+        , description => "Post a new session"
+        , consumes => ["application/json"]
+        , produces => ["application/json"]
+        }
+     },
+  Path = "/sessions/",
+  Options = #{module => ?MODULE, init_args => #{path => Path}},
+  [trails:trail(Path, ?MODULE, Options, Metadata)].
+
 
 allowed_methods(Req, State) ->
   {[ <<"POST">>

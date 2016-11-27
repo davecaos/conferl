@@ -8,15 +8,20 @@
      stdlib,
      lager,
      sumo_db,
-     cowboy
+     cowboy,
+     trails,
+     cowboy_swagger
     ]},
+  {start_phases , [
+    {start_cowboy_listeners, []}
+  ]},
   {modules, []},
   {mod, {conferl, []}},
   {registered, []},
   {pkg_name, conferl},
-  {maintainers, ["Inaka"]},
+  {maintainers, ["David Cesar Hernan Cao"]},
   {licenses, ["Apache 2.0"]},
-  {links, [{"Github", "https://github.com/inaka/conferl"}]}
+  {links, [{"Github", "https://github.com/davecaos/conferl"}]}
  ]
 }.
 
