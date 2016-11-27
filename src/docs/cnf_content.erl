@@ -12,7 +12,7 @@
 % specific language governing permissions and limitations
 % under the License.
 -module(cnf_content).
--author('David Cao <david.cao@inakanetworks.com>').
+-author('David Cao <david.c.h.cao@gmail.com>').
 
 -opaque content() ::
         #{  id         => integer()

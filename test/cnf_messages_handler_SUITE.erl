@@ -14,7 +14,7 @@
 
 -module(cnf_messages_handler_SUITE).
 
--author('David Cao <david.cao@inakanetworks.com>').
+-author('David Cao <david.c.h.cao@gmail.com>').
 
 -export([all/0]).
 -export([init_per_suite/1]).
