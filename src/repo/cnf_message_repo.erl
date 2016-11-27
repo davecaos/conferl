@@ -13,7 +13,7 @@
 % under the License.
 -module(cnf_message_repo).
 
--author('David Cao <david.cao@inakanetworks.com>').
+-author('David Cao <david.c.h.cao@gmail.com>').
 
 -export([write/1]).
 -export([write_top/3]).

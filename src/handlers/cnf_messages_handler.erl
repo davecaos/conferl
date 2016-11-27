@@ -17,6 +17,9 @@
 -author('David Cao <david.c.h.cao@gmail.com>').
 
 -include_lib("mixer/include/mixer.hrl").
+
+-behaviour(trails_handler).
+
 -mixin([
         {cnf_default_handler,
          [ init/2
@@ -31,15 +34,35 @@
 -export([handle_post/2]).
 -export([allowed_methods/2]).
 -export([is_authorized/2]).
--compile(export_all).
+-export([trails/0]).
+
 -type state() :: #{}.
 
+%% trails_handler callback
+-spec trails() -> trails:trails().
+trails() ->
+  Metadata =
+    #{ get =>
+       #{ tags => ["messages"]
+        , description => "Get messages"
+        , produces => ["application/json"]
+        }
+     , post =>
+       #{ tags => ["messages"]
+        , description => "Post a message"
+        , consumes => ["application/json"]
+        , produces => ["application/json"]
+        }
+     },
+  Path = "/messages/",
+  Options = #{module => ?MODULE, init_args => #{path => Path}},
+  [trails:trail(Path, ?MODULE, Options, Metadata)].
+
 allowed_methods(Req, State) ->
-  {[ <<"GET">>
-   , <<"POST">>
-   , <<"OPTIONS">>]
+  {[<<"GET">>, <<"POST">>, <<"OPTIONS">>]
   , Req
-  , State}.
+  , State
+  }.
 
 -spec is_authorized(cowboy_req:req(), state()) ->
   {boolean() | {boolean(), binary()}, cowboy_req:req(), state()}.

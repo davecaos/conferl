@@ -13,7 +13,7 @@
 % under the License.
 -module(cnf_session_repo).
 
--author('David Cao <david.cao@inakanetworks.com>').
+-author('David Cao <david.c.h.cao@gmail.com>').
 
 -export([register/1]).
 -export([unregister/1]).

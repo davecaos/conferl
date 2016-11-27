@@ -16,6 +16,8 @@
 
 -author('David Cao <david.c.h.cao@gmail.com>').
 
+-behaviour(trails_handler).
+
 -include_lib("mixer/include/mixer.hrl").
 -mixin([
         {cnf_default_handler,
@@ -30,14 +32,29 @@
 -export([delete_resource/2]).
 -export([allowed_methods/2]).
 -export([is_authorized/2]).
+-export([trails/0]).
 
 -type state() :: #{}.
 
+%% trails_handler callback
+-spec trails() -> trails:trails().
+trails() ->
+  Metadata =
+    #{ delete =>
+       #{ tags => ["sessions"]
+        , description => "Delete a session"
+        , produces => ["application/json"]
+        }
+     },
+  Path = "/sessions/:token",
+  Options = #{module => ?MODULE, init_args => #{path => Path}},
+  [trails:trail(Path, ?MODULE, Options, Metadata)].
+
 allowed_methods(Req, State) ->
-  {[ <<"DELETE">>
-   , <<"OPTIONS">>]
+  {[<<"DELETE">>, <<"OPTIONS">>]
   , Req
-  , State}.
+  , State
+  }.
 
 -spec is_authorized(cowboy_req:req(), state()) ->
   {boolean() | {boolean(), binary()}, cowboy_req:req(), state()}.

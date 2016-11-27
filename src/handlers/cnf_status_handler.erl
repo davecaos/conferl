@@ -14,11 +14,28 @@
 
 -module(cnf_status_handler).
 
--author('David Cao <david.cao@inakanetworks.com>').
+-author('David Cao <david.c.h.cao@gmail.com>').
+
+-behaviour(trails_handler).
 
 -export([ handle/2
         , init/2
+        , trails/0
         ]).
+
+%% trails_handler callback
+-spec trails() -> trails:trails().
+trails() ->
+  Metadata =
+    #{ get =>
+       #{ tags => ["status"]
+        , description => "Get the system status"
+        , produces => ["application/json"]
+        }
+     },
+  Path = "/status",
+  Opts = #{path => Path},
+  [trails:trail(Path, ?MODULE, Opts, Metadata)].
 
 init(Req, _Opts) ->
   {ok, Req, undefined}.

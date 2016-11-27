@@ -17,6 +17,7 @@
 -export([start/2]).
 -export([stop/0]).
 -export([stop/1]).
+-export([start_phase/3]).
 
 %% application
 %% @doc Starts the application
@@ -29,32 +30,45 @@ stop() ->
 
 %% behaviour
 %% @private
-start(_StartType, _StartArgs) ->
-  EndPoints =
-  [
-      {<<"/status">>, cnf_status_handler, []}
-    , {<<"/contents/">>, cnf_contents_handler, []}
-    , {<<"/contents/:content_id">>, cnf_content_single_handler, []}
-    , {<<"/sessions/">>, cnf_sessions_handler, []}
-    , {<<"/sessions/:token">>, cnf_session_single_handler, []}
-    , {<<"/users/">>, cnf_users_handler, []}
-    , {<<"/users/:user_id">>, cnf_user_single_handler, []}
-    , {<<"/messages/">>, cnf_messages_handler, []}
-    , {<<"/messages/:messages_id">>, cnf_single_message_handler, []}
-    , {<<"/me/">>, cnf_me_handler, []}
-    %% Add here new endpoints
+-spec start(application:start_type(), any()) -> {ok, pid()}.
+start(_Type, _Args) -> conferl_sup:start_link().
+
+start_phase(start_cowboy_listeners, _StartType, []) ->
+  Handlers =
+  [ cowboy_swagger_handler
+  , cnf_status_handler
+  , cnf_contents_handler
+  , cnf_content_single_handler
+  , cnf_sessions_handler
+  , cnf_session_single_handler
+  , cnf_users_handler
+  , cnf_user_single_handler
+  , cnf_messages_handler
+  , cnf_single_message_handler
+  , cnf_me_handler
+    %% Add here new handlers
   ],
-  Dispatch = cowboy_router:compile( [{'_' , EndPoints}]),
+  
+  % Get the trails routes for each handler
+  Routes = trails:trails(Handlers),
+
+  % Store them in trails so Cowboy is able to get them
+  trails:store(Routes),
+
+  % Set server routes
+  Dispatch = trails:single_host_compile(Routes),
+
+  % Set the options for cowboy
   {ok, Port} = application:get_env(conferl, http_port),
   {ok, HttpListenersCount} = application:get_env(conferl, http_listener_count),
-  {ok, _} =
-  cowboy:start_http( my_http_listener
-                   , HttpListenersCount
-                   , [{port, Port}]
-                   , [{env, [{dispatch, Dispatch}]}]
-                   ),
-
-  conferl_sup:start_link().
+  TransOptions = [{port, Port}],
+  ProtoOptions = [{env, [{dispatch, Dispatch}, {compress, true}]}],
+  
+  % Start Cowboy HTTP server
+  case cowboy:start_http(http_conferl_server, HttpListenersCount, TransOptions, ProtoOptions) of
+    {error, {already_started, _}} -> ok;
+    _WhenOthers -> ok
+  end.
 
 %% @private
 stop(_State) ->
