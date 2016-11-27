@@ -14,7 +14,7 @@
 
 -module(cnf_me_handler).
 
--author('David Cao <david.cao@inakanetworks.com>').
+-author('David Cao <david.c.h.cao@gmail.com>').
 
 -include_lib("mixer/include/mixer.hrl").
 -mixin([

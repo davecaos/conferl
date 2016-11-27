@@ -13,7 +13,7 @@
 % under the License.
 -module(cnf_utils).
 
--author('David Cao <david.cao@inakanetworks.com>').
+-author('David Cao <david.c.h.cao@gmail.com>').
 
 -export([handle_exception/3]).
 -export([datetime_to_binary/1]).
