@@ -14,6 +14,8 @@
 -module(cnf_content_repo).
 -author('David Cao <david.c.h.cao@gmail.com>').
 
+-type maybe_exists(Type) :: Type | not_found.
+
 %%% General repo functions.
 -export(
   [ update/1
@@ -48,24 +50,22 @@ find_by_user(UserId)  ->
 find_by_domain(Domain)  ->
   sumo:find_by(cnf_content, [{domain, Domain}]).
 
--spec register(string(), integer()) -> cnf_content:content().
+-spec register(string(), integer()) ->
+  cnf_content:content() | duplicated_content.
 register(Url, User) ->
   Content = cnf_content:new(Url, User),
   case find_by_url(cnf_content:url(Content)) of
     []  -> sumo:persist(cnf_content, Content);
-    _   -> throw(duplicated_content)
+    _   -> duplicated_content
   end.
 
 -spec unregister(non_neg_integer()) -> boolean().
 unregister(Id) ->
   sumo:delete(cnf_content, Id).
 
--spec fetch(integer()) -> notfound | cnf_content:content().
+-spec fetch(integer()) -> maybe_exists(cnf_content:content()).
 fetch(ContentId) ->
-  case sumo:find(cnf_content, ContentId) of
-    notfound  -> throw(notfound);
-    Content   -> Content
-  end.
+  sumo:find(cnf_content, ContentId).
 
 -spec list(binary()) -> [cnf_content:content()].
 list(Domain) ->

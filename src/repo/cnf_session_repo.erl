@@ -15,6 +15,8 @@
 
 -author('David Cao <david.c.h.cao@gmail.com>').
 
+-type maybe_exists(Type) :: Type | not_found.
+
 -export([register/1]).
 -export([unregister/1]).
 -export([find_by_user/1]).
@@ -31,19 +33,19 @@ register(UserId) ->
 unregister(Token) ->
   sumo:delete_by(cnf_session, [{token, Token}]).
 
--spec find_by_user(non_neg_integer()) -> cnf_session:session().
+-spec find_by_user(non_neg_integer()) -> maybe_exists(cnf_session:session()).
 find_by_user(UserId) ->
   Result = sumo:find_by(cnf_session, [{user_id, UserId}]),
   case Result of
-    [] -> throw(notfound);
+    []     -> notfound;
     [User] -> User
   end.
 
--spec find_by_token(binary()) -> cnf_session:session().
+-spec find_by_token(binary()) -> maybe_exists(cnf_session:session()).
 find_by_token(Token) ->
   Result =  sumo:find_by(cnf_session, [{token, Token}]),
   case Result of
-    [] -> throw(notfound);
+    []     -> notfound;
     [User] -> User
   end.
 

@@ -14,6 +14,9 @@
 -module(cnf_vote_repo).
 
 -author('David Cao <david.c.h.cao@gmail.com>').
+
+-type maybe_exists(Type) :: Type | not_found.
+
 -export([upvote/2]).
 -export([downvote/2]).
 -export([remove_vote/1]).
@@ -42,22 +45,18 @@ downvote(UserId, MessageId) ->
 remove_vote(VoteId) ->
   sumo:delete(cnf_vote, VoteId).
 
--spec fetch_vote(integer(), integer()) -> cnf_vote:vote().
+-spec fetch_vote(integer(), integer()) -> maybe_exists(cnf_vote:vote()).
 fetch_vote(MessageId, UserId) ->
   Result =
     sumo:find_by(cnf_vote, [{message_id, MessageId}, {user_id, UserId}]),
   case Result of
-    []     -> throw(notfound);
+    []     -> notfound;
     [Vote] -> Vote
   end.
 
 -spec fetch_vote(integer()) -> cnf_vote:vote().
 fetch_vote(VoteId) ->
-  Result = sumo:find(cnf_vote, VoteId),
-  case Result of
-    notfound  -> throw(notfound);
-    Vote      -> Vote
-  end.
+  sumo:find(cnf_vote, VoteId).
 
 -spec list_votes(integer()) -> [cnf_vote:vote()].
 list_votes(MessageId) ->

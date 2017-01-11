@@ -51,7 +51,6 @@ all() ->
 
 -spec init_per_suite(config()) -> config().
 init_per_suite(Config) ->
-  {ok, _} = application:ensure_all_started(conferl),
   {ok, _} = application:ensure_all_started(shotgun),
   sumo:create_schema(),
   Config.
@@ -158,9 +157,5 @@ delete_session(Config) ->
   {ok, Response} =
     cnf_test_utils:api_call(delete, "/sessions/" ++ Token, Header, JsonBody),
   #{status_code := 204} = Response,
-  try cnf_session_repo:find_by_user(cnf_session:user_id(Session)) of
-    _Content -> ct:fail("Unexpected result (!)")
-  catch
-    throw:notfound -> ok
-  end,
+  notfound =cnf_session_repo:find_by_user(cnf_session:user_id(Session)),
   Config.

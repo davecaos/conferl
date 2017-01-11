@@ -18,6 +18,7 @@
 -export([handle_exception/3]).
 -export([datetime_to_binary/1]).
 -export([truncate_seconds/1]).
+-export([resource_exists/3]).
 
 -spec truncate_seconds(tuple()) -> tuple().
 truncate_seconds({{Yi, Mi, Di}, {Hi, Ni, Si}}) ->
@@ -60,3 +61,24 @@ handle_exception(Reason, Req, State) ->
         Req
     end,
   {halt, Req1, State}.
+
+-spec resource_exists(fun((any()) -> any()), cowboy_req:req(), map()) ->
+  {boolean(), cowboy_req:req(), map()}.
+resource_exists(Fetch, Req, State) ->
+  case cowboy_req:binding(id, Req) of
+    undefined ->
+      {true, Req, State};
+    Id ->
+      Method = cowboy_req:method(Req),
+      resource_exists(Method, Id, Fetch, Req, State)
+  end.
+
+
+resource_exists(<<"DELETE">>, _, _Fetch, Req, State) -> {true, Req, State};
+resource_exists(_, Id, Fetch, Req, State) ->
+  try Fetch(binary_to_integer(Id)) of
+    notfound -> {false, Req, State};
+    Resource -> {true, Req, State#{resource => Resource}}
+  catch
+    _Error:_Exp -> {false, Req, State}
+  end.

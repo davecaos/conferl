@@ -78,13 +78,18 @@ handle_post(Req, State) ->
   #{<<"url">> := Url} = Body,
   try
     #{token := Token} = State,
-    UserId = cnf_session:user_id(cnf_session_repo:find_by_token(Token)),
-    Content = cnf_content_repo:register(binary_to_list(Url), UserId),
-    Id = cnf_content:id(Content),
-    Host = cowboy_req:url(Req1),
-    Location = [Host, <<"/">>, list_to_binary(integer_to_list(Id))],
-    Req2 = cowboy_req:set_resp_header(<<"Location">>, Location, Req1),
-    {true, Req2, State}
+    Session = cnf_session_repo:find_by_token(Token),
+    UserId = cnf_session:user_id(Session),
+    case cnf_content_repo:register(binary_to_list(Url), UserId) of
+      duplicated_content ->
+        {false, Req, State};
+      Content ->
+        Id = cnf_content:id(Content),
+        Host = cowboy_req:url(Req1),
+        Location = [Host, <<"/">>, list_to_binary(integer_to_list(Id))],
+        Req2 = cowboy_req:set_resp_header(<<"Location">>, Location, Req1),
+       {true, Req2, State}
+    end
   catch
     _Type:Exception ->
       cnf_utils:handle_exception(Exception, Req, State)

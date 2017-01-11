@@ -108,22 +108,13 @@ double_registration_bad(Config) ->
   Url      = proplists:get_value(url, Config),
   User     = proplists:get_value(user, Config),
   _Content = cnf_content_repo:register(Url, User),
-  try cnf_content_repo:register(Url, User) of
-    _NotExpected -> ct:fail("Unexpected result (!)")
-  catch
-    throw:duplicated_content -> ok;
-    Error:Reason            -> ct:fail("~p ~p", [Error, Reason])
-  end.
+  duplicated_content = cnf_content_repo:register(Url, User).
 
 %% @doc tests for fetch of content
 -spec fetch_notfound_content(config()) -> ok.
 fetch_notfound_content(Config) ->
   ContentId   = proplists:get_value(id, Config),
-  try cnf_content_repo:fetch(ContentId) of
-    _NotExpected -> ct:fail("Unexpected result (!)")
-  catch
-    throw:notfound  -> ok
-  end.
+  notfound = cnf_content_repo:fetch(ContentId).
 
 %% @doc tests for list of contents
 -spec test_list_contents(config()) -> ok.
