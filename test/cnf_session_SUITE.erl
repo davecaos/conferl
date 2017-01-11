@@ -91,11 +91,7 @@ delete_session(Config) ->
   RegistedUser = cnf_user_repo:register(UserName, Passsword, Email),
   Session = cnf_session_repo:register(cnf_user:id(RegistedUser)),
   1 = cnf_session_repo:unregister(cnf_session:token(Session)),
-  try cnf_session_repo:find_by_user(cnf_session:user_id(Session)) of
-    _Content -> ct:fail("Unexpected result (!)")
-  catch
-    throw:notfound -> ok
-  end,
+  notfound = cnf_session_repo:find_by_user(cnf_session:user_id(Session)),
   Config.
 
 -spec test_find_by_token(config()) ->  config().

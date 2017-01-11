@@ -34,6 +34,7 @@
 -export([delete_resource/2]).
 -export([is_authorized/2]).
 -export([trails/0]).
+-export([resource_exists/2]).
 
 -type state() :: #{}.
 
@@ -52,7 +53,7 @@ trails() ->
         , produces => ["application/json"]
         }
      },
-  Path = "/messages/:messages_id",
+  Path = "/messages/:id",
   Options = #{module => ?MODULE, init_args => #{path => Path}},
   [trails:trail(Path, ?MODULE, Options, Metadata)].
 
@@ -68,17 +69,20 @@ allowed_methods(Req, State) ->
 is_authorized(Req, State) ->
   is_authorized_by_token(Req, State).
 
+-spec resource_exists(cowboy_req:req(), term()) ->
+  {boolean(), cowboy_req:req(), term()}.
+resource_exists(Req, State) ->
+  cnf_utils:resource_exists(fun cnf_message_repo:find/1, Req, State).
+
 -spec handle_get(cowboy_req:req(), state()) ->
   {list(), cowboy_req:req(), state()}.
-handle_get(Req, State) ->
-  Id = cowboy_req:binding(messages_id, Req),
-  RequestContent = cnf_message_repo:find(list_to_integer(binary_to_list(Id))),
+handle_get(Req, #{resource := RequestContent} = State) ->
   Body = cnf_message:to_json(RequestContent),
   {Body, Req, State}.
 
 -spec delete_resource(cowboy_req:req(), state()) ->
   {boolean(), cowboy_req:req(), state()}.
 delete_resource(Req, State) ->
-  Id = cowboy_req:binding(messages_id, Req),
+  Id = cowboy_req:binding(id, Req),
   cnf_message_repo:delete(list_to_integer(binary_to_list(Id))),
   {true, Req, State}.

@@ -35,12 +35,7 @@
 -spec trails() -> trails:trails().
 trails() ->
   Metadata =
-    #{ get =>
-       #{ tags => ["users"]
-        , description => "Get users"
-        , produces => ["application/json"]
-        }
-     , post =>
+    #{ post =>
        #{ tags => ["users"]
         , description => "Post a new user"
         , consumes => ["application/json"]
@@ -65,11 +60,13 @@ handle_post(Req, State) ->
    , <<"email">>     := Email
    , <<"password">>  := Password
    } = jiffy:decode(JsonRequestBody, [return_maps]),
-  try
-    RegistedUser = cnf_user_repo:register(UserName, Password, Email) ,
-    JsonResponseBody = cnf_user:to_json(RegistedUser),
-    Req2 = cowboy_req:set_resp_body(JsonResponseBody, Req1),
-    {true, Req2, State}
+  try cnf_user_repo:register(UserName, Password, Email) of
+    duplicate_user ->
+      {false, Req, State};
+    RegistedUser   ->
+      JsonResponseBody = cnf_user:to_json(RegistedUser),
+      Req2 = cowboy_req:set_resp_body(JsonResponseBody, Req1),
+      {true, Req2, State}
   catch
     _Type:Exception ->
       cnf_utils:handle_exception(Exception, Req, State)

@@ -49,7 +49,6 @@ all() ->
 
 -spec init_per_suite(config()) -> config().
 init_per_suite(Config) ->
-  {ok, _} = application:ensure_all_started(conferl),
   {ok, _} = application:ensure_all_started(shotgun),
   sumo:create_schema(),
   Config.

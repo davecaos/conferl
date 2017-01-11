@@ -130,19 +130,21 @@ binary_number(Binary, BuilderFun) ->
 -spec handle_get(cowboy_req:req(), state()) ->
   {list(), cowboy_req:req(), state()}.
 handle_get(Req, State) ->
+  CowboyMatchValues =
+    [ {all_msg_content, fun all_msg_content/1 , []}
+    , {all_rply_content, fun all_rply_content/1, []}
+    , {top_msg_content, fun top_msg_content/1, []}
+    , {all_msg_user, fun all_msg_user/1, []}
+    , {sort_created_at, fun sort_created_at/1, []}
+    , {sort_by_score, fun sort_by_score/1, []}
+    ],
   #{ all_msg_content := AllMsgContest
    , all_rply_content := AllRplyContent
    , top_msg_content := TopMsgContent
    , all_msg_user := AllMsgUser
    , sort_created_at := SortCreatedAt
    , sort_by_score := SortByScore
-   } = cowboy_req:match_qs([ {all_msg_content, fun all_msg_content/1 , []}
-                           , {all_rply_content, fun all_rply_content/1, []}
-                           , {top_msg_content, fun top_msg_content/1, []}
-                           , {all_msg_user, fun all_msg_user/1, []}
-                           , {sort_created_at, fun sort_created_at/1, []}
-                           , {sort_by_score, fun sort_by_score/1, []}
-                           ], Req),
+   } = cowboy_req:match_qs(CowboyMatchValues, Req),
   QueryString =
     AllMsgContest ++
     AllMsgUser ++

@@ -32,6 +32,7 @@
 -export([allowed_methods/2]).
 -export([is_authorized/2]).
 -export([trails/0]).
+-export([resource_exists/2]).
 
 -type state() :: #{}.
 
@@ -45,7 +46,7 @@ trails() ->
         , produces => ["application/json"]
         }
      },
-  Path = "/users/:user_id",
+  Path = "/users/:id",
   Options = #{module => ?MODULE, init_args => #{path => Path}},
   [trails:trail(Path, ?MODULE, Options, Metadata)].
 
@@ -58,10 +59,13 @@ allowed_methods(Req, State) ->
   {boolean() | {boolean(), binary()}, cowboy_req:req(), state()}.
 is_authorized(Req, State) -> is_authorized_by_token(Req, State).
 
+-spec resource_exists(cowboy_req:req(), term()) ->
+  {boolean(), cowboy_req:req(), term()}.
+resource_exists(Req, State) ->
+  cnf_utils:resource_exists(fun cnf_user_repo:find/1, Req, State).
+
 -spec handle_get(cowboy_req:req(), state()) ->
   {list(), cowboy_req:req(), state()}.
-handle_get(Req, State) ->
-  UserId = cowboy_req:binding(user_id, Req),
-  RequestContent = cnf_user_repo:find(list_to_integer(binary_to_list(UserId))),
+handle_get(Req, #{resource := RequestContent} = State) ->
   JsonResponseBody = cnf_user:to_json(RequestContent),
   {JsonResponseBody, Req, State}.

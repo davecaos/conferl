@@ -15,31 +15,33 @@
 
 -author('David Cao <david.cao@inakanetworks.com>').
 
+-type maybe_exists(Type) :: Type | not_found.
+
 -export([register/3]).
 -export([unregister/1]).
 -export([find/1]).
 -export([find_by_name/1]).
 -export([is_registered/2]).
 
--spec register(binary(), binary(), binary()) -> cnf_user:user().
+-spec register(binary(), binary(), binary()) ->
+  cnf_user:user() | duplicated_user.
 register(UserName, Password, Email) ->
-  try find_by_name(UserName) of
-    _   -> throw(duplicated_user)
-  catch
-    throw:notfound ->
+  case find_by_name(UserName) of
+    notfound ->
       NewUser = cnf_user:new(UserName, Password, Email),
-      sumo:persist(cnf_user, NewUser)
+      sumo:persist(cnf_user, NewUser);
+    _WhenOthers -> duplicated_user
   end.
 
--spec unregister(binary()) -> non_neg_integer().
+-spec unregister(binary()) -> non_neg_integer() | notfound.
 unregister(UserName) ->
   Result = sumo:delete_by(cnf_user, [{user_name, UserName}]),
   case Result of
-    0  -> throw(notfound);
+    0  -> notfound;
     NumberRows -> NumberRows
   end.
 
--spec find(integer()) -> cnf_user:user() | notfound.
+-spec find(integer()) -> maybe_exists(cnf_user:user()).
 find(UserId) ->
   sumo:find(cnf_user, UserId).
 
@@ -47,7 +49,7 @@ find(UserId) ->
 find_by_name(UserName) ->
   Result = sumo:find_by(cnf_user, [{user_name, UserName}]),
   case Result of
-    [] -> throw(notfound);
+    []     -> notfound;
     [User] -> User
   end.
 

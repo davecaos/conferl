@@ -101,11 +101,8 @@ duplicated_user(_Config) ->
   Passsword = <<"passsword">>,
   Email = <<"email">>,
   _User = cnf_user_repo:register(UserName, Passsword, Email),
-  try cnf_user_repo:register(UserName, Passsword, Email) of
-    _ -> ct:fail("Unexpected result (!)")
-  catch
-    throw:duplicated_user -> ok
-  end.
+  duplicated_user = cnf_user_repo:register(UserName, Passsword, Email),
+  ok.
 
 -spec unregistrate_user(config()) -> ok.
 unregistrate_user(_Config) ->
@@ -114,28 +111,17 @@ unregistrate_user(_Config) ->
   Email = <<"email">>,
   RegistedUser = cnf_user_repo:register(UserName, Passsword, Email),
   cnf_user_repo:unregister(UserName),
-  try cnf_user_repo:find_by_name(UserName) of
-    _ -> ct:fail("Unexpected result (!)")
-  catch
-    throw:notfound -> ok
-  end,
+  notfound = cnf_user_repo:find_by_name(UserName),
   ok.
 
 -spec fetch_user_bad(config()) -> ok.
 fetch_user_bad(_Config) ->
   NotFoundId = <<"0xFFFF">>,
-  try cnf_user_repo:find_by_name(NotFoundId) of
-    _ -> ct:fail("Unexpected result (!)")
-  catch
-    throw:notfound -> ok
-  end,
+  notfound = cnf_user_repo:find_by_name(NotFoundId),
   ok.
 
 -spec unregistrate_user_bad(config()) -> ok.
 unregistrate_user_bad(_Config) ->
   Name = <<"0xFFFF">>,
-  try cnf_user_repo:unregister(Name) of
-    _ -> ct:fail("Unexpected result (!)")
-  catch
-    throw:notfound -> ok
-  end.
+  notfound = cnf_user_repo:unregister(Name),
+  ok.
